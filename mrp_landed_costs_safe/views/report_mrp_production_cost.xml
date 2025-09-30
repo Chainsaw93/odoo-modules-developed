@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_mrp_production_cost_landed_costs" inherit_id="mrp.report_mrp_production_cost">
+        
+        <xpath expr="//h3[last()]" position="after">
+            <t t-foreach="cost_analysis" t-as="data">
+                <t t-if="data.get('landed_costs')">
+                    <h3 class="mt-4">Costos indirectos</h3>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Costo en Destino</th>
+                                <th class="text-end">Cantidad de Unidades</th>
+                                <th class="text-end">Precio Unitario</th>
+                                <th class="text-end">Costo Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="data['landed_costs']" t-as="lc">
+                                <td><span t-esc="lc['name']"/></td>
+                                <td class="text-end"><span t-esc="lc['quantity']" t-options="{'widget': 'float', 'precision': 2}"/></td>
+                                <td class="text-end"><span t-esc="lc['unit_price']" t-options="{'widget': 'monetary', 'display_currency': currency}"/></td>
+                                <td class="text-end"><span t-esc="lc['cost']" t-options="{'widget': 'monetary', 'display_currency': currency}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+            </t>
+        </xpath>
+
+        <xpath expr="//div[hasclass('row')]/div[hasclass('col-6')]/table[hasclass('table-sm')]/tr[last()]" position="after">
+            <t t-foreach="cost_analysis" t-as="data">
+                 <t t-if="data.get('total_landed_cost')">
+                    <tr class="border-black o_total">
+                        <td><strong>Costos indirectos</strong></td>
+                        <td class="text-end">
+                            <span t-esc="data['total_landed_cost']" t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </xpath>
+
+    </template>
+</odoo>

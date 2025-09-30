@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia de la vista form de sale.order para agregar vendedores externos -->
+    <record id="view_sale_order_form_external_salesperson" model="ir.ui.view">
+        <field name="name">sale.order.form.external.salesperson</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo vendedores externos después del campo partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="external_salesperson_ids" 
+                       string="Vendedores Externos"
+                       widget="many2many_tags"
+                       options="{'color_field': 'seller_type', 'no_create': True}"
+                       help="Seleccione los vendedores externos para esta cotización si aplica."/>
+            </xpath>
+            
+            <!-- Agregar botón de actualización en el header -->
+            <xpath expr="//button[@name='action_quotation_send']" position="after">
+                <button name="action_update_external_salesperson" 
+                        type="object" 
+                        string="Actualizar Vendedores"
+                        class="btn-secondary"
+                        invisible="state != 'sale'"
+                        help="Actualizar vendedores externos en facturas relacionadas"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia de la vista tree de sale.order -->
+    <record id="view_sale_order_tree_external_salesperson" model="ir.ui.view">
+        <field name="name">sale.order.tree.external.salesperson</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="external_salesperson_names" 
+                       string="Vendedores Externos"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia de la vista de búsqueda para agregar filtros -->
+    <record id="view_sale_order_search_external_salesperson" model="ir.ui.view">
+        <field name="name">sale.order.search.external.salesperson</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo de búsqueda -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="external_salesperson_ids" string="Vendedor Externo"/>
+            </xpath>
+            
+            <!-- Agregar filtros usando xpath más seguro -->
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="has_external_salesperson" 
+                        string="Con Vendedores Externos"
+                        domain="[('external_salesperson_ids', '!=', False)]"/>
+                <filter name="leader_assigned" 
+                        string="Con Líderes Asignados"
+                        domain="[('external_salesperson_ids.seller_type', '=', 'leader')]"/>
+            </xpath>
+            
+            <!-- Agregar agrupación usando xpath más seguro -->
+            <xpath expr="//filter[@name='salesperson']" position="after">
+                <filter name="group_external_salesperson" 
+                        string="Vendedor Externo" 
+                        context="{'group_by': 'external_salesperson_ids'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista específica para cotizaciones con enfoque en vendedores externos -->
+    <record id="view_quotation_external_salesperson_form" model="ir.ui.view">
+        <field name="name">sale.order.quotation.external.salesperson.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar información destacada sobre vendedores externos -->
+            <xpath expr="//sheet" position="inside">
+                <div class="alert alert-info" 
+                     role="alert" 
+                     invisible="not external_salesperson_ids or state != 'draft'">
+                    <p><strong><i class="fa fa-info-circle"/> Vendedores Externos Asignados</strong></p>
+                    <p>Esta cotización tiene vendedores externos asignados. Al confirmar la cotización, 
+                       los vendedores se transferirán automáticamente a las facturas generadas.</p>
+                </div>
+                
+                <div class="alert alert-info" 
+                     role="alert" 
+                     invisible="external_salesperson_ids or state != 'draft'">
+                    <p><strong><i class="fa fa-info-circle"/> Información</strong></p>
+                    <p>Esta cotización no tiene vendedores externos asignados. 
+                       Puede asignar vendedores externos si es necesario para esta cotización.</p>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acción para ver órdenes de venta por vendedor externo -->
+    <record id="action_sale_order_external_salesperson" model="ir.actions.act_window">
+        <field name="name">Órdenes con Vendedores Externos</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('external_salesperson_ids', '!=', False)]</field>
+        <field name="context">{
+            'search_default_has_external_salesperson': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay órdenes con vendedores externos!
+            </p>
+            <p>
+                Aquí encontrará todas las órdenes de venta que tienen vendedores externos asignados.
+            </p>
+        </field>
+    </record>
+</odoo>

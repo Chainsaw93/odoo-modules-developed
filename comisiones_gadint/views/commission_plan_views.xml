@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+    Archivo placeholder para futuras extensiones de planes de comisión
+    La corrección del 500% se hace automáticamente via hook SQL
+    -->
+</odoo>

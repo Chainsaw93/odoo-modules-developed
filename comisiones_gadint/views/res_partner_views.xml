@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia de la vista form de res.partner para agregar campo booleano -->
+    <record id="view_partner_form_external_sales_team" model="ir.ui.view">
+        <field name="name">res.partner.form.external.sales.team</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo booleano después del campo user_id en la sección de ventas -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="external_sales_team" 
+                       string="Equipo vendedores externos"
+                       help="Marque esta casilla si este contacto pertenece al equipo de vendedores externos"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de lista mejorada para mostrar vendedores externos -->
+    <record id="view_partner_tree_external_sales_team" model="ir.ui.view">
+        <field name="name">res.partner.tree.external.sales.team</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="external_sales_team" 
+                       string="Vendedor Externo"
+                       widget="boolean_toggle"
+                       optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Filtro de búsqueda para vendedores externos -->
+    <record id="view_partner_search_external_sales_team" model="ir.ui.view">
+        <field name="name">res.partner.search.external.sales.team</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='supplier']" position="after">
+                <filter name="external_sales_team" 
+                        string="Vendedores Externos"
+                        domain="[('external_sales_team','=',True)]"/>
+            </xpath>
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter name="group_external_sales_team" 
+                        string="Equipo de Vendedores Externos" 
+                        context="{'group_by': 'external_sales_team'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista form simplificada para vendedores externos (sin chatter) -->
+    <record id="view_partner_external_sales_form" model="ir.ui.view">
+        <field name="name">res.partner.external.sales.form</field>
+        <field name="model">res.partner</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Vendedor Externo" create="true" edit="true" delete="true">
+                <header>
+                    <!-- Header sin botones de chatter -->
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Botones adicionales si son necesarios -->
+                    </div>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre del vendedor externo" required="1"/>
+                        </h1>
+                        <div class="o_row" name="options">
+                            <field name="is_company" invisible="1"/>
+                            <field name="company_type" widget="radio" options="{'horizontal': true}"/>
+                        </div>
+                    </div>
+                    
+                    <group>
+                        <group name="contact_details">
+                            <label for="street" string="Dirección"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Calle..."/>
+                                <field name="street2"/>
+                                <div class="address_format">
+                                    <field name="city" placeholder="Ciudad" style="width: 40%"/>
+                                    <field name="state_id" class="o_address_state" placeholder="Estado" style="width: 37%" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="zip" placeholder="Código Postal" style="width: 20%"/>
+                                </div>
+                                <field name="country_id" placeholder="País" options="{'no_open': True, 'no_create': True}"/>
+                            </div>
+                            <field name="phone" widget="phone"/>
+                            <field name="mobile" widget="phone"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                        
+                        <group name="sales_info">
+                            <field name="external_sales_team" string="Es vendedor externo" readonly="1"/>
+                            <field name="user_id" string="Vendedor responsable" options="{'no_create': True}"/>
+                            <field name="commission_plan_id" invisible="not external_sales_team" groups="sales_team.group_sale_manager"/>
+                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Etiquetas..."/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Información adicional" name="additional_info">
+                            <group>
+                                <group string="Configuración de ventas" name="sale">
+                                    <field name="customer_rank" invisible="1"/>
+                                    <field name="supplier_rank" invisible="1"/>
+                                </group>
+                                <group string="Miscelánea" name="misc">
+                                    <field name="lang" groups="base.group_no_one"/>
+                                    <field name="active" invisible="1"/>
+                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- NO div class="oe_chatter" aquí -->
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para lista de vendedores externos -->
+    <record id="action_partner_external_sales_team" model="ir.actions.act_window">
+        <field name="name">Contactos - Vendedores Externos</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('external_sales_team', '=', True)]</field>
+        <field name="context">{
+            'default_external_sales_team': True,
+            'search_default_external_sales_team': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Crear su primer vendedor externo!
+            </p>
+            <p>
+                Aquí encontrará todos los contactos marcados como vendedores externos.
+                Estos contactos pueden ser utilizados en el sistema de comisiones.
+            </p>
+        </field>
+    </record>
+
+    <!-- Especificar las vistas para la acción de vendedores externos -->
+    <record id="action_partner_external_sales_team_tree_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="10"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_partner_tree_external_sales_team"/>
+        <field name="act_window_id" ref="action_partner_external_sales_team"/>
+    </record>
+    
+    <record id="action_partner_external_sales_team_form_view" model="ir.actions.act_window.view">
+        <field name="sequence" eval="20"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_partner_external_sales_form"/>
+        <field name="act_window_id" ref="action_partner_external_sales_team"/>
+    </record>
+    
+    <!-- Campo de plan de comisión solo si el módulo está disponible -->
+    <record id="view_partner_form_external_commission_plan" model="ir.ui.view">
+        <field name="name">res.partner.form.external.commission.plan</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='external_sales_team']" position="after">
+                <field name="commission_plan_id" 
+                       invisible="not external_sales_team"
+                       groups="sales_team.group_sale_manager"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

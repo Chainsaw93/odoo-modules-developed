@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Grupo de seguridad para modificar facturas en borrador -->
+        <record model="res.groups" id="group_modify_draft_invoice">
+            <field name="name">Modificar Datos de Factura en Estado Borrador</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="comment">Permite modificar precios, cantidades, descuentos y moneda en facturas borrador</field>
+        </record>
+    </data>
+</odoo>

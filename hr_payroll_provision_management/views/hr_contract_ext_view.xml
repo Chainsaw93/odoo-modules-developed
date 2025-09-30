@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Contract Form View to Add Provisions Tab -->
+    <record id="hr_provision_contract_inherit" model="ir.ui.view">
+        <field name="name">hr.contract.provision.inherit</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_xiii.view_contract_xiii_ext"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[last()]" position="after">
+                <page name="provisions" 
+                      string="Provisions"
+                      invisible="not accumulate_xiii">
+                    <!-- XIII Provisions Section -->
+                    <group string="XIII Provisions">
+                        <field name="provision_xiii_ids" nolabel="1" readonly="1">
+                            <list string="XIII Provisions" 
+                                  decoration-info="state == 'pending'"
+                                  decoration-muted="state == 'paid'"
+                                  decoration-danger="state == 'cancelled'">
+                                <field name="name"/>
+                                <field name="provision_date"/>
+                                <field name="provision_amount"/>
+                                <field name="description"/>
+                                <field name="state" widget="badge"/>
+                            </list>
+                        </field>
+                        <group>
+                            <field name="pending_provision_xiii" 
+                                   string="Total Pending XIII"
+                                   widget="monetary"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

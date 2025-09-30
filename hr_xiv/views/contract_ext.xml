@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Contract Form View to Add XIV Configuration -->
+    <record id="view_contract_xiv_ext" model="ir.ui.view">
+        <field name="name">hr.contract.xiv.form.inherit</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="xiv_configuration" string="XIV Configuration">
+                    <group string="XIV Settings">
+                        <field name="accumulate_xiv" 
+                               widget="boolean_toggle"
+                               help="Enable XIV salary accumulation for this contract"/>
+                        <field name="accumulated_xiv_amount" 
+                               invisible="not accumulate_xiv"
+                               widget="monetary"
+                               help="XIV amount accumulated since hiring or from period start to date"/>
+                    </group>
+                    
+                    <separator string="SBU Configuration" 
+                              invisible="not accumulate_xiv"/>
+                    <group invisible="not accumulate_xiv" string="SBU (Unified Basic Salary)">
+                        <group>
+                            <field name="sbu_amount" 
+                                   widget="monetary"
+                                   help="Override default SBU for this contract"/>
+                            <label for="sbu_info" string="Default SBU"/>
+                            <div name="sbu_info">
+                                <span class="text-muted">
+                                    System default: Check Payroll > Configuration > Settings
+                                </span>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="calculation_info" string="XIV Calculation"/>
+                            <div name="calculation_info">
+                                <span class="text-muted">
+                                    Monthly XIV = (SBU / 360) × 30<br/>
+                                    Full SBU after 11+ months of work
+                                </span>
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

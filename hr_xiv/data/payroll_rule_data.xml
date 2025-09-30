@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- XIV Payroll Rules -->
+    
+    <!-- Monthly XIV Rule -->
+    <record id="hr_rule_xiv_month" model="hr.salary.rule">
+        <field name="name">XIV Mensualizado</field>
+        <field name="sequence" eval="92"/>
+        <field name="code">XIV</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="appears_on_payslip" eval="True"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = not contract.accumulate_xiv or False</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract._get_current_sbu_value() / 360 * 30 if contract._get_current_sbu_value() else 0.0</field>
+        <field name="struct_id" ref="hr_payroll.hr_payroll_structure_cp200_employee_salary"/>
+        <field name="note">Monthly XIV salary calculation for employees not accumulating XIV (based on SBU)</field>
+    </record>
+
+    <!-- Accumulated XIV Rule -->
+    <record id="hr_rule_xiv_accumulated" model="hr.salary.rule">
+        <field name="name">XIV Accumulated</field>
+        <field name="sequence" eval="91"/>
+        <field name="code">XIV-A</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="appears_on_payslip" eval="True"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+# Check if contract accumulates XIV and we're in the XIV period
+result = False
+if contract.accumulate_xiv:
+    try:
+        init_date, end_date = contract.get_xiv_period()
+        result = (payslip.date_from.month >= init_date.month and 
+                 payslip.date_to.month <= end_date.month)
+    except:
+        result = False
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract.get_accumulated_xiv_amount() if contract.accumulate_xiv else 0.0</field>
+        <field name="struct_id" ref="hr_payroll.hr_payroll_structure_cp200_employee_salary"/>
+        <field name="note">Accumulated XIV salary payment during XIV period (full SBU or accumulated amount)</field>
+    </record>
+
+    <!-- XIV Provision Rule -->
+    <record id="hr_rule_xiv_prov" model="hr.salary.rule">
+        <field name="name">XIV Provision</field>
+        <field name="sequence" eval="183"/>
+        <field name="code">XIV-P</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="appears_on_payslip" eval="False"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = contract.accumulate_xiv or False</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = contract._get_current_sbu_value() / 360 * 30 if contract._get_current_sbu_value() else 0.0</field>
+        <field name="struct_id" ref="hr_payroll.hr_payroll_structure_cp200_employee_salary"/>
+        <field name="note">XIV provision calculation for accumulating contracts (monthly SBU-based amount)</field>
+    </record>
+
+</odoo>

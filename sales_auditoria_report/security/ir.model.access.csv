@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_wizard_ventas_auditoria,wizard.ventas.auditoria,model_wizard_ventas_auditoria,,1,1,1,0

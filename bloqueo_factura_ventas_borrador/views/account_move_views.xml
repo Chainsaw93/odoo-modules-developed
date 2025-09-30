@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista heredada para agregar el campo personalizado -->
+    <record id="bloqueo_move_form_inherit" model="ir.ui.view">
+        <field name="name">bloqueo.move.form.invoice_lines.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_unit']" position="after">
+                <field name="qqwewe"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Campo computed para controlar permisos -->
+    <record id="bloqueo_move_form_readonly_control" model="ir.ui.view">
+        <field name="name">bloqueo.move.form.readonly.control</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo invisible para controlar readonly -->
+            <xpath expr="//form/sheet" position="before">
+                <field name="can_modify_draft_invoice" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista mejorada para aplicar restricciones de interfaz SOLO A FACTURAS DE VENTA -->
+    <record id="bloqueo_move_form_restrictions" model="ir.ui.view">
+        <field name="name">bloqueo.move.form.restrictions</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="bloqueo_move_form_readonly_control"/>
+        <field name="arch" type="xml">
+            <!-- Hacer campos de línea readonly usando parent - SOLO PARA FACTURAS DE VENTA -->
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.move_type == 'out_invoice' and ((parent.invoice_origin and parent.state in ['draft', 'posted'] and not parent.can_modify_draft_invoice) or (parent.state == 'draft' and not parent.can_modify_draft_invoice))</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='quantity']" position="attributes">
+                <attribute name="readonly">parent.move_type == 'out_invoice' and ((parent.invoice_origin and parent.state in ['draft', 'posted'] and not parent.can_modify_draft_invoice) or (parent.state == 'draft' and not parent.can_modify_draft_invoice))</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='discount']" position="attributes">
+                <attribute name="readonly">parent.move_type == 'out_invoice' and ((parent.invoice_origin and parent.state in ['draft', 'posted'] and not parent.can_modify_draft_invoice) or (parent.state == 'draft' and not parent.can_modify_draft_invoice))</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="attributes">
+                <attribute name="readonly">parent.move_type == 'out_invoice' and parent.invoice_origin and parent.state in ['draft', 'posted'] and not parent.can_modify_draft_invoice</attribute>
+            </xpath>
+            
+            <!-- Controlar botones de agregar/eliminar líneas - SOLO PARA FACTURAS DE VENTA -->
+            <xpath expr="//field[@name='invoice_line_ids']" position="attributes">
+                <attribute name="context">{
+                    'default_move_type': move_type, 
+                    'line_ids_readonly': move_type == 'out_invoice' and invoice_origin and not can_modify_draft_invoice
+                }</attribute>
+                <attribute name="create">not (move_type == 'out_invoice' and ((state == 'draft' and not can_modify_draft_invoice) or (invoice_origin and not can_modify_draft_invoice)))</attribute>
+                <attribute name="delete">not (move_type == 'out_invoice' and ((state == 'draft' and not can_modify_draft_invoice) or (invoice_origin and not can_modify_draft_invoice)))</attribute>
+            </xpath>
+            
+            <!-- Campos del encabezado readonly - SOLO PARA FACTURAS DE VENTA -->
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="readonly">move_type == 'out_invoice' and invoice_origin and state in ['draft', 'posted'] and not can_modify_draft_invoice</attribute>
+            </xpath>
+            <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="readonly">move_type == 'out_invoice' and invoice_origin and state in ['draft', 'posted'] and not can_modify_draft_invoice</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_date']" position="attributes">
+                <attribute name="readonly">move_type == 'out_invoice' and invoice_origin and state in ['draft', 'posted'] and not can_modify_draft_invoice</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_payment_term_id']" position="attributes">
+                <attribute name="readonly">move_type == 'out_invoice' and invoice_origin and state in ['draft', 'posted'] and not can_modify_draft_invoice</attribute>
+            </xpath>
+            <xpath expr="//field[@name='journal_id']" position="attributes">
+                <attribute name="readonly">move_type == 'out_invoice' and state == 'draft' and not can_modify_draft_invoice</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista para mostrar información sobre el origen de la factura - SOLO PARA FACTURAS DE VENTA -->
+    <record id="bloqueo_move_form_origin_info" model="ir.ui.view">
+        <field name="name">bloqueo.move.form.origin.info</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="bloqueo_move_form_restrictions"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_origin']" position="after">
+                <!-- Mostrar alerta solo si la factura viene de pedido Y el usuario NO tiene permisos Y ES FACTURA DE VENTA -->
+                <div class="alert alert-info" role="alert" 
+                     invisible="not invoice_origin or move_type != 'out_invoice' or can_modify_draft_invoice">
+                    <strong>Nota:</strong> Esta factura proviene de un pedido de venta y sus datos no pueden ser modificados.
+                </div>
+                <!-- Mostrar alerta diferente si es factura borrador Y el usuario NO tiene permisos Y ES FACTURA DE VENTA -->
+                <div class="alert alert-warning" role="alert" 
+                     invisible="state != 'draft' or move_type != 'out_invoice' or can_modify_draft_invoice or invoice_origin">
+                    <strong>Aviso:</strong> No tiene permisos para modificar facturas de venta en estado borrador.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

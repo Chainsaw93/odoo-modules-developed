@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_importation_report_wizard_form" model="ir.ui.view">
+        <field name="name">importation.report.wizard.form</field>
+        <field name="model">importation.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generar Reporte de Importación">
+                <group>
+                    <field name="importation_id" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_generate_report" 
+                            type="object" 
+                            string="Generar Reporte Excel" 
+                            class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_importation_report_wizard" model="ir.actions.act_window">
+        <field name="name">Generar Reporte de Importación</field>
+        <field name="res_model">importation.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

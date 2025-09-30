@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Heredar la vista del formulario de órdenes de compra -->
+    <record id="view_purchase_order_form_warranty" model="ir.ui.view">
+        <field name="name">purchase.order.form.warranty</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar el campo después del campo currency_id -->
+            <xpath expr="//field[@name='currency_id'][@groups='base.group_multi_currency']" position="after">
+                <field name="warranty_purchase" widget="boolean_toggle" 
+                       readonly="state not in ('draft', 'sent')"
+                       help="Marcar como compra por garantía para usar operación de recepción específica"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de lista para mostrar el campo warranty_purchase -->
+    <record id="view_purchase_order_tree_warranty" model="ir.ui.view">
+        <field name="name">purchase.order.tree.warranty</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+        <field name="arch" type="xml">
+            <!-- Agregar columna para warranty_purchase -->
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="warranty_purchase" string="Garantía" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para filtrar por warranty_purchase -->
+    <record id="view_purchase_order_filter_warranty" model="ir.ui.view">
+        <field name="name">purchase.order.search.warranty</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <!-- Agregar filtro para compras por garantía -->
+            <xpath expr="//filter[@name='my_purchases']" position="after">
+                <separator/>
+                <filter name="warranty_purchases" string="Compras por Garantía" 
+                        domain="[('warranty_purchase', '=', True)]"/>
+                <filter name="regular_purchases" string="Compras Regulares" 
+                        domain="[('warranty_purchase', '=', False)]"/>
+            </xpath>
+            <!-- Agregar agrupación por warranty_purchase -->
+            <xpath expr="//group[@expand='0']" position="inside">
+                <filter name="group_by_warranty" string="Por Tipo de Compra" 
+                        context="{'group_by': 'warranty_purchase'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

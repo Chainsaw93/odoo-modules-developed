@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista form del wizard sin atributos prohibidos -->
+    <record id="view_wizard_ventas_auditoria_form" model="ir.ui.view">
+        <field name="name">wizard.ventas.auditoria.form</field>
+        <field name="model">wizard.ventas.auditoria</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Ventas Auditoría">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+
+                <!-- Ahora mostramos siempre este grupo. -->
+                <!-- Si aún no hay archivo, action_open_download() lanzará error. -->
+                <group>
+                    <field name="xlsx_filename" invisible="1"/>
+                    <field name="xlsx_file" invisible="1"/>
+                    <button name="action_open_download"
+                            string="Descargar Excel"
+                            type="object"
+                            class="btn-success"
+                            icon="fa-download"/>
+                </group>
+
+                <footer>
+                    <button name="action_print_pdf"
+                            type="object"
+                            string="Imprimir PDF"
+                            class="btn-primary"/>
+                    <button name="action_generate_xlsx"
+                            type="object"
+                            string="Generar Excel"
+                            class="btn-secondary"/>
+                    <button string="Cancelar"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir el wizard -->
+    <record id="action_wizard_ventas_auditoria" model="ir.actions.act_window">
+        <field name="name">Reporte de Ventas Auditoría</field>
+        <field name="res_model">wizard.ventas.auditoria</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_wizard_ventas_auditoria_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

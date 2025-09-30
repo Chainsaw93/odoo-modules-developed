@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- XIII Payroll Rules -->
+
+    <!-- Monthly XIII Rule -->
+    <record id="hr_rule_xiii_month" model="hr.salary.rule">
+        <field name="name">XIII Mensualizado</field>
+        <field name="sequence" eval="89"/>
+        <field name="code">XIII</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="appears_on_payslip" eval="True"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python"><![CDATA[
+result = not contract.accumulate_xiii or False
+        ]]></field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute"><![CDATA[
+result = (categories.BASIC + categories.ALW) / 12
+        ]]></field>
+        <field name="struct_id" ref="hr_payroll.default_structure"/>
+        <field name="note">Monthly XIII salary calculation for employees not accumulating XIII</field>
+    </record>
+
+    <!-- Accumulated XIII Rule -->
+    <record id="hr_rule_xiii_accumulated" model="hr.salary.rule">
+        <field name="name">XIII ACCUMULATED</field>
+        <field name="sequence" eval="88"/>
+        <field name="code">XIII-A</field>
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="appears_on_payslip" eval="True"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python"><![CDATA[
+# Check if contract accumulates XIII and we're in the XIII period
+result = False
+if contract.accumulate_xiii:
+    try:
+        init_date, end_date = contract.get_xiii_period()
+        result = (payslip.date_from.month >= init_date.month and
+                  payslip.date_to.month <= end_date.month)
+    except Exception:
+        result = False
+        ]]></field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute"><![CDATA[
+result = contract.accumulated_xiii_amount_by_employee(payslip.employee_id.id)
+        ]]></field>
+        <field name="struct_id" ref="hr_payroll.default_structure"/>
+        <field name="note">Accumulated XIII salary payment during XIII period</field>
+    </record>
+
+    <!-- XIII Provision Rule -->
+    <record id="hr_rule_xiii_prov" model="hr.salary.rule">
+        <field name="name">XIII Provision</field>
+        <field name="sequence" eval="182"/>
+        <field name="code">XIII-P</field>
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="appears_on_payslip" eval="False"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python"><![CDATA[
+result = contract.accumulate_xiii or False
+        ]]></field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute"><![CDATA[
+result = (categories.BASIC + categories.ALW) / 12
+        ]]></field>
+        <field name="struct_id" ref="hr_payroll.default_structure"/>
+        <field name="note">XIII provision calculation for accumulating contracts</field>
+    </record>
+
+</odoo>

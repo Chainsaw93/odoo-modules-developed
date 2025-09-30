@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para abrir el wizard -->
+    <record id="commission_report_wizard_action" model="ir.actions.act_window">
+        <field name="name">Reporte de Comisiones</field>
+        <field name="res_model">commission.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="commission_report_wizard_form"/>
+    </record>
+</odoo>

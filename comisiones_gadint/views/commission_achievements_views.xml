@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de lista para achievements de comisiones por importe cobrado -->
+    <record id="view_commission_achievement_tree" model="ir.ui.view">
+        <field name="name">sale.commission.achievement.tree.amount_collected</field>
+        <field name="model">sale.commission.achievement</field>
+        <field name="arch" type="xml">
+            <list string="Comisiones por Importe Cobrado" 
+                  decoration-success="type == 'amount_collected'"
+                  default_order="date desc">
+                <field name="date"/>
+                <field name="invoice_id" string="Factura"/>
+                <field name="external_salesperson_id" string="Vendedor Externo"/>
+                <field name="external_salesperson_partner_id" string="Contacto Vendedor"/>
+                <field name="note" string="Descripción"/>
+                <field name="type" string="Tipo" widget="badge"/>
+                <field name="amount" string="Importe Comisión" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="user_id" string="Usuario"/>
+                <field name="team_id" string="Equipo"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para achievements -->
+    <record id="view_commission_achievement_form" model="ir.ui.view">
+        <field name="name">sale.commission.achievement.form.amount_collected</field>
+        <field name="model">sale.commission.achievement</field>
+        <field name="arch" type="xml">
+            <form string="Comisión por Importe Cobrado">
+                <sheet>
+                    <group>
+                        <group string="Información Principal">
+                            <field name="date"/>
+                            <field name="type" readonly="1"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group string="Referencias">
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="external_salesperson_id" readonly="1"/>
+                            <field name="external_salesperson_partner_id" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="team_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Descripción">
+                        <field name="note" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para achievements -->
+    <record id="view_commission_achievement_search" model="ir.ui.view">
+        <field name="name">sale.commission.achievement.search.amount_collected</field>
+        <field name="model">sale.commission.achievement</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Comisiones">
+                <field name="note" string="Descripción"/>
+                <field name="invoice_id" string="Factura"/>
+                <field name="external_salesperson_id" string="Vendedor Externo"/>
+                <field name="external_salesperson_partner_id" string="Contacto Vendedor"/>
+                <field name="user_id" string="Usuario"/>
+                <field name="team_id" string="Equipo"/>
+                
+                <filter name="amount_collected" string="Importe Cobrado" 
+                        domain="[('type', '=', 'amount_collected')]"/>
+                <filter name="this_month" string="Este Mes"
+                        domain="[('date', '>=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="last_month" string="Mes Pasado"
+                        domain="[('date', '>=', (context_today() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')),
+                                 ('date', '&lt;', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_type" string="Tipo" context="{'group_by': 'type'}"/>
+                    <filter name="group_by_salesperson" string="Vendedor Externo" context="{'group_by': 'external_salesperson_id'}"/>
+                    <filter name="group_by_partner" string="Contacto Vendedor" context="{'group_by': 'external_salesperson_partner_id'}"/>
+                    <filter name="group_by_user" string="Usuario" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_by_team" string="Equipo" context="{'group_by': 'team_id'}"/>
+                    <filter name="group_by_date" string="Fecha" context="{'group_by': 'date:month'}"/>
+                    <filter name="group_by_invoice" string="Factura" context="{'group_by': 'invoice_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para ver achievements de importe cobrado -->
+    <record id="action_commission_achievement_amount_collected" model="ir.actions.act_window">
+        <field name="name">Comisiones por Importe Cobrado</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.commission.achievement</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('type', '=', 'amount_collected')]</field>
+        <field name="context">{
+            'search_default_amount_collected': 1,
+            'search_default_this_month': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay comisiones por importe cobrado!
+            </p>
+            <p>
+                Aquí encontrará todas las comisiones generadas automáticamente 
+                cuando se confirman facturas con vendedores externos.
+            </p>
+            <p>
+                Las comisiones se calculan:
+                <ul>
+                    <li>Al confirmar la factura (base: importe total)</li>
+                    <li>Para líderes: porcentaje directo configurado</li>
+                    <li>Para vendedores: porcentaje del plan de comisión</li>
+                </ul>
+            </p>
+        </field>
+    </record>
+
+    <!-- Vista de reporte personalizada para sale.commission.report -->
+    <record id="view_sale_commission_report_gadint_tree" model="ir.ui.view">
+        <field name="name">sale.commission.report.gadint.list</field>
+        <field name="model">sale.commission.report</field>
+        <field name="arch" type="xml">
+            <list string="Reporte de Comisiones (Vendedores Externos)">
+                <field name="is_amount_collected" string="Importe Cobrado" widget="boolean_toggle"/>
+                <field name="external_salesperson_id" string="Vendedor Externo"/>
+                <field name="invoice_reference" string="Factura"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda personalizada para sale.commission.report -->
+    <record id="view_sale_commission_report_gadint_search" model="ir.ui.view">
+        <field name="name">sale.commission.report.gadint.search</field>
+        <field name="model">sale.commission.report</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Reporte de Comisiones">
+                <field name="external_salesperson_id"/>
+                <field name="invoice_reference"/>
+                
+                <filter name="amount_collected_filter" string="Comisiones Importe Cobrado"
+                        domain="[('is_amount_collected', '=', True)]"/>
+                <filter name="external_sales" string="Vendedores Externos"
+                        domain="[('external_salesperson_id', '!=', False)]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_external_salesperson" string="Vendedor Externo"
+                            context="{'group_by': 'external_salesperson_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para el reporte extendido - Usar achievements en su lugar -->
+    <record id="action_sale_commission_report_gadint" model="ir.actions.act_window">
+        <field name="name">Reporte de Comisiones (Vendedores Externos)</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.commission.achievement</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_commission_achievement_tree"/>
+        <field name="search_view_id" ref="view_commission_achievement_search"/>
+        <field name="domain">[('type', '=', 'amount_collected')]</field>
+        <field name="context">{
+            'search_default_amount_collected': 1,
+            'search_default_this_month': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay datos de comisiones de vendedores externos!
+            </p>
+            <p>
+                Este reporte muestra las comisiones generadas para vendedores externos
+                basadas en el importe cobrado de las facturas.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú para comisiones de vendedores externos -->
+</odoo>

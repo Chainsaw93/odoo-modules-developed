@@ -1,0 +1,262 @@
+/* Estados de validación para campos de entrada */
+.serial-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.serial-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.serial-pending {
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+    background-color: rgba(255, 193, 7, 0.05);
+}
+
+/* Contenedor del campo de validación */
+.serial-validation-field {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Indicadores de estado en el campo */
+.serial-status-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.serial-status-valid {
+    color: #28a745;
+}
+
+.serial-status-invalid {
+    color: #dc3545;
+}
+
+.serial-status-pending {
+    color: #ffc107;
+}
+
+/* Animación de carga durante validación */
+.serial-validating {
+    position: relative;
+}
+
+.serial-validating::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: serial-spin 1s linear infinite;
+    z-index: 10;
+}
+
+@keyframes serial-spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Mensajes de validación */
+.serial-validation-message {
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.serial-error-message {
+    color: #dc3545;
+}
+
+.serial-success-message {
+    color: #28a745;
+}
+
+.serial-warning-message {
+    color: #ffc107;
+}
+
+.serial-validation-message i {
+    margin-right: 6px;
+    font-size: 14px;
+}
+
+/* Estilos para el picker de lotes/series */
+.serial-lot-picker {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #fff;
+}
+
+.serial-lot-picker.has-error {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.serial-lot-picker.has-success {
+    border-color: #28a745;
+    background-color: #f8fff8;
+}
+
+/* Estilos para alertas en los pickings */
+.serial-validation-alert {
+    border-left: 4px solid #17a2b8;
+    background-color: #d1ecf1;
+    color: #0c5460;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.serial-validation-alert.alert-success {
+    border-left-color: #28a745;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.serial-validation-alert.alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.serial-validation-alert.alert-danger {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Estilos para la aplicación de códigos de barras */
+.barcode-serial-scanner {
+    position: relative;
+}
+
+.barcode-serial-feedback {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+.barcode-serial-feedback.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.barcode-serial-feedback.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Estilos responsivos para móviles */
+@media (max-width: 768px) {
+    .serial-validation-field {
+        width: 100%;
+    }
+    
+    .serial-status-indicator {
+        right: 8px;
+        font-size: 14px;
+    }
+    
+    .serial-validation-message {
+        font-size: 11px;
+    }
+    
+    .barcode-serial-feedback {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        text-align: center;
+    }
+}
+
+/* Estilos para tablas con validación de series */
+.o_list_table .serial-validation-cell {
+    position: relative;
+}
+
+.o_list_table .serial-validation-cell input {
+    padding-right: 30px;
+}
+
+.o_list_table .serial-status-indicator {
+    right: 8px;
+    font-size: 14px;
+}
+
+/* Estilos para campos en formularios */
+.o_form_view .serial-validation-field input {
+    padding-right: 35px;
+}
+
+/* Mejoras de accesibilidad */
+.serial-validation-field:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Animaciones suaves */
+.serial-validation-field input {
+    transition: all 0.3s ease;
+}
+
+.serial-validation-message {
+    transition: opacity 0.3s ease;
+}
+
+/* Estados hover para mejor UX */
+.serial-validation-field:hover .serial-status-indicator {
+    opacity: 0.8;
+}
+
+/* Estilos para notificaciones Toast personalizadas */
+.serial-validation-toast {
+    border-left: 4px solid;
+    padding-left: 16px;
+}
+
+.serial-validation-toast.toast-success {
+    border-left-color: #28a745;
+}
+
+.serial-validation-toast.toast-error {
+    border-left-color: #dc3545;
+}
+
+.serial-validation-toast.toast-warning {
+    border-left-color: #ffc107;
+}

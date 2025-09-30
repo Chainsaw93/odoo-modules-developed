@@ -1,0 +1,94 @@
+# Spanish translations for stock_serial_validation module
+msgid ""
+msgstr ""
+"Project-Id-Version: stock_serial_validation 18.0.2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-07-14 12:00+0000\n"
+"PO-Revision-Date: 2024-07-14 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: stock_serial_validation
+#: model:ir.model.fields,field_description:stock_serial_validation.field_stock_move_line__serial_validation_status
+msgid "Estado de Validación"
+msgstr "Estado de Validación"
+
+#. module: stock_serial_validation
+#: code:addons/stock_serial_validation/models/stock_serial_validation_service.py:0
+#, python-format
+msgid "El número digitado ya se encuentra registrado en este conduce"
+msgstr "El número digitado ya se encuentra registrado en este conduce"
+
+#. module: stock_serial_validation
+#: code:addons/stock_serial_validation/models/stock_serial_validation_service.py:0
+#, python-format
+msgid "El número de serie \"%s\" ya está siendo utilizado en otro conduce pendiente (%s)"
+msgstr "El número de serie \"%s\" ya está siendo utilizado en otro conduce pendiente (%s)"
+
+#. module: stock_serial_validation
+#: model:ir.model.fields,field_description:stock_serial_validation.field_stock_move_line__serial_validation_message
+msgid "Mensaje de Validación"
+msgstr "Mensaje de Validación"
+
+#. module: stock_serial_validation
+#: code:addons/stock_serial_validation/models/stock_move_line.py:0
+#, python-format
+msgid "Número de serie requerido"
+msgstr "Número de serie requerido"
+
+#. module: stock_serial_validation
+#: model:ir.ui.view,arch_db:stock_serial_validation.view_picking_form_serial_validation
+msgid "Validar Series"
+msgstr "Validar Series"
+
+#. module: stock_serial_validation
+#: model:ir.ui.view,arch_db:stock_serial_validation.view_stock_move_line_form_serial_validation
+msgid "Validar Serie"
+msgstr "Validar Serie"
+
+#. module: stock_serial_validation
+#: selection:stock.move.line,serial_validation_status:0
+msgid "Válido"
+msgstr "Válido"
+
+#. module: stock_serial_validation
+#: selection:stock.move.line,serial_validation_status:0
+msgid "Inválido"
+msgstr "Inválido"
+
+#. module: stock_serial_validation
+#: selection:stock.move.line,serial_validation_status:0
+msgid "Pendiente"
+msgstr "Pendiente"
+
+#. module: stock_serial_validation
+#: selection:stock.move.line,serial_validation_status:0
+msgid "No Requerido"
+msgstr "No Requerido"
+
+#. module: stock_serial_validation
+#: code:addons/stock_serial_validation/models/stock_picking.py:0
+#, python-format
+msgid "Validación Completa"
+msgstr "Validación Completa"
+
+#. module: stock_serial_validation
+#: code:addons/stock_serial_validation/models/stock_picking.py:0
+#, python-format
+msgid "Todos los números de serie son válidos"
+msgstr "Todos los números de serie son válidos"
+
+#. module: stock_serial_validation
+#: model:ir.ui.view,arch_db:stock_serial_validation.view_stock_move_line_detailed_operation_tree_serial
+msgid "Escribir número de serie..."
+msgstr "Escribir número de serie..."
+
+#. module: stock_serial_validation
+#: model:ir.ui.view,arch_db:stock_serial_validation.view_stock_move_line_detailed_operation_tree_serial
+msgid "Seleccionar serie existente..."
+msgstr "Seleccionar serie existente..."

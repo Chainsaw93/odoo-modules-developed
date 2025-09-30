@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mrp_production_cost_line_user,mrp.production.cost.line.user,model_mrp_production_cost_line,mrp.group_mrp_user,1,1,1,1
+access_mrp_production_cost_line_manager,mrp.production.cost.line.manager,model_mrp_production_cost_line,mrp.group_mrp_manager,1,1,1,1
+access_mrp_production_close_confirmation_user,mrp.production.close.confirmation.user,model_mrp_production_close_confirmation,mrp.group_mrp_user,1,1,1,1
+access_mrp_production_close_confirmation_manager,mrp.production.close.confirmation.manager,model_mrp_production_close_confirmation,mrp.group_mrp_manager,1,1,1,1

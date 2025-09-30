@@ -1,0 +1,71 @@
+<odoo>
+    <!-- Vista heredada del formulario de activos -->
+    <record id="view_account_asset_form_responsable" model="ir.ui.view">
+        <field name="name">account.asset.form.responsable</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Responsable">
+                    <group>
+                        <group>
+                            <field name="responsible_id"/>
+                            <field name="delivery_date"/>
+                            <field name="delivery_state"/>
+                        </group>
+                        <group>
+                            <field name="return_date"/>
+                            <field name="return_state"/>
+                        </group>
+                    </group>
+                    <separator string="Historial de Responsables"/>
+                    <field name="responsible_history_ids" nolabel="1" readonly="1"/>
+                </page>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_deliver_asset" type="object" string="Entregar Activo" class="btn-primary"/>
+                <button name="action_return_asset" type="object" string="Devolver Activo" class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista tree separada para el historial de responsables - Solo lectura -->
+    <record id="view_asset_responsible_history_list" model="ir.ui.view">
+        <field name="name">asset.responsible.history.list</field>
+        <field name="model">asset.responsible.history</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="responsible_id"/>
+                <field name="delivery_date"/>
+                <field name="delivery_state"/>
+                <field name="return_date"/>
+                <field name="return_state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista form para el historial de responsables -->
+    <record id="view_asset_responsible_history_form" model="ir.ui.view">
+        <field name="name">asset.responsible.history.form</field>
+        <field name="model">asset.responsible.history</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id"/>
+                            <field name="responsible_id"/>
+                            <field name="delivery_date"/>
+                            <field name="delivery_state"/>
+                        </group>
+                        <group>
+                            <field name="return_date"/>
+                            <field name="return_state"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

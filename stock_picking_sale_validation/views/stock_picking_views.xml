@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vista de formulario extendida para stock.picking -->
+        <record id="view_picking_form_enhanced" model="ir.ui.view">
+            <field name="name">stock.picking.form.enhanced</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="priority">15</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='origin']" position="after">
+                    <div class="alert alert-info" invisible="picking_type_code != 'outgoing' or not origin">
+                        <strong>Restricción Activa:</strong>
+                        Solo se pueden agregar productos que pertenezcan al pedido de venta 
+                        <strong><field name="origin" readonly="1"/></strong>
+                    </div>
+                </xpath>
+                
+                <!-- Modificar contexto del campo move_ids_without_package -->
+                <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
+                    <attribute name="context">{
+                        'default_company_id': company_id,
+                        'default_date': scheduled_date,
+                        'default_date_deadline': date_deadline,
+                        'picking_type_code': picking_type_code,
+                        'default_picking_id': id,
+                        'picking_id': id,
+                        'picking_origin': origin,
+                        'form_view_ref': 'stock.view_stock_move_operations',
+                        'address_in_id': partner_id,
+                        'default_picking_type_id': picking_type_id,
+                        'default_location_id': location_id,
+                        'default_location_dest_id': location_dest_id,
+                        'default_partner_id': partner_id
+                    }</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Botón para mostrar productos disponibles -->
+        <record id="view_picking_form_show_products_button" model="ir.ui.view">
+            <field name="name">stock.picking.form.show.products</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="priority">16</field>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_assign']" position="after">
+                    <button name="action_show_allowed_products" 
+                            string="Ver Productos Permitidos" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="picking_type_code != 'outgoing' or not origin"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

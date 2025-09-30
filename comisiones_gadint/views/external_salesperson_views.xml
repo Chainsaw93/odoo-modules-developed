@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario para vendedores externos -->
+    <record id="view_external_salesperson_form" model="ir.ui.view">
+        <field name="name">gadint.external.salesperson.form</field>
+        <field name="model">gadint.external.salesperson</field>
+        <field name="arch" type="xml">
+            <form string="Vendedores externos">
+                <sheet>
+                    <!-- Removido el oe_button_box para evitar errores de validación -->
+                    
+                    <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="ej. Supervisor, Vendedor 1, etc." required="1"/>
+                        </h1>
+                        <h2>
+                            <field name="seller_type" widget="radio" options="{'horizontal': true}" required="1"/>
+                        </h2>
+                    </div>
+
+                    <group>
+                        <group string="Información del Vendedor">
+                            <field name="partner_id" 
+                                   options="{'no_create': True, 'no_edit': True}"
+                                   domain="[('external_sales_team', '=', True)]"
+                                   context="{'show_external_salesperson_info': True}"
+                                   required="1"/>
+                            <field name="partner_email" readonly="1"/>
+                            <field name="partner_phone" readonly="1"/>
+                        </group>
+                        
+                        <group string="Configuración de Comisión">
+                            <field name="leader_percentage" 
+                                   string="% Directo sobre Factura"
+                                   widget="percentage"
+                                   invisible="seller_type != 'leader'"
+                                   required="seller_type == 'leader'"/>
+                            <div invisible="seller_type != 'salesperson'" class="alert alert-info">
+                                <span>Los vendedores regulares usan el % configurado en el plan de comisión</span>
+                            </div>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Información Adicional" name="additional_info">
+                            <group>
+                                <group string="Detalles del Contacto">
+                                    <label for="partner_id" string="Contacto Relacionado"/>
+                                    <div>
+                                        <field name="partner_id" 
+                                               widget="res_partner_many2one"
+                                               nolabel="1"
+                                               readonly="1"/>
+                                    </div>
+                                </group>
+                                <group string="Configuración">
+                                    <field name="display_name" readonly="1"/>
+                                    <field name="commission_rate_display" readonly="1"/>
+                                    <button name="refresh_commission_rate_display" 
+                                            type="object" 
+                                            string="🔄 Actualizar %" 
+                                            class="btn-sm btn-secondary"
+                                            help="Forzar actualización del porcentaje mostrado"/>
+                                </group>
+                            </group>
+                            
+                            <div class="alert alert-info" role="alert" invisible="seller_type != 'leader'">
+                                <p><strong>Información sobre Líderes:</strong></p>
+                                <ul>
+                                    <li>El porcentaje define la comisión adicional para líderes</li>
+                                    <li>El valor por defecto es 1% (100%)</li>
+                                    <li>Puede modificar este valor según las políticas de comisión</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-warning" role="alert" invisible="seller_type != 'salesperson'">
+                                <p><strong>Vendedor Regular:</strong></p>
+                                <p>Los vendedores regulares utilizan las comisiones estándar definidas en los planes de comisión.</p>
+                            </div>
+                        </page>
+                        
+                        <page string="Historial de Ventas" name="sales_history">
+                            <p class="text-muted">
+                                En futuras versiones aquí se mostrarán las estadísticas de ventas y comisiones 
+                                generadas por este vendedor externo.
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de lista para vendedores externos -->
+    <record id="view_external_salesperson_tree" model="ir.ui.view">
+        <field name="name">gadint.external.salesperson.tree</field>
+        <field name="model">gadint.external.salesperson</field>
+        <field name="arch" type="xml">
+            <list string="Vendedores externos" 
+                  default_order="name asc"
+                  decoration-muted="not active">
+                <field name="name"/>
+                <field name="seller_type" widget="badge" 
+                       decoration-success="seller_type == 'leader'"
+                       decoration-info="seller_type == 'salesperson'"/>
+                <field name="partner_id"/>
+                <field name="partner_email" optional="show"/>
+                <field name="partner_phone" optional="hide"/>
+                <field name="leader_percentage" 
+                       string="% Comisión"
+                       widget="percentage"
+                       optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para vendedores externos -->
+    <record id="view_external_salesperson_search" model="ir.ui.view">
+        <field name="name">gadint.external.salesperson.search</field>
+        <field name="model">gadint.external.salesperson</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Vendedores Externos">
+                <field name="name" string="Nombre"
+                       filter_domain="['|', ('name', 'ilike', self), ('display_name', 'ilike', self)]"/>
+                <field name="partner_id" string="Contacto"/>
+                <field name="partner_email" string="Email"/>
+                
+                <filter name="active" string="Activos" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Inactivos" domain="[('active', '=', False)]"/>
+                
+                <separator/>
+                <filter name="leaders" string="Líderes" domain="[('seller_type', '=', 'leader')]"/>
+                <filter name="salespersons" string="Vendedores" domain="[('seller_type', '=', 'salesperson')]"/>
+                
+                <separator/>
+                <filter name="high_percentage" string="% Alto (>5%)" 
+                        domain="[('leader_percentage', '>', 5)]"/>
+                
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_by_type" string="Tipo de Vendedor" 
+                            context="{'group_by': 'seller_type'}"/>
+                    <filter name="group_by_active" string="Estado" 
+                            context="{'group_by': 'active'}"/>
+                    <filter name="group_by_company" string="Compañía" 
+                            context="{'group_by': 'company_id'}" 
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista kanban para vendedores externos -->
+    <record id="view_external_salesperson_kanban" model="ir.ui.view">
+        <field name="name">gadint.external.salesperson.kanban</field>
+        <field name="model">gadint.external.salesperson</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="seller_type" class="o_kanban_dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="seller_type"/>
+                <field name="partner_id"/>
+                <field name="partner_email"/>
+                <field name="leader_percentage"/>
+                <field name="active"/>
+                <templates>
+                    <t t-name="card" class="flex-column">
+                        <div class="o_kanban_card_header">
+                            <div class="o_kanban_card_header_title">
+                                <div class="o_primary">
+                                    <strong><field name="name"/></strong>
+                                </div>
+                                <div class="o_secondary">
+                                    <span t-if="record.seller_type.raw_value == 'leader'" 
+                                          class="badge bg-success">Líder</span>
+                                    <span t-if="record.seller_type.raw_value == 'salesperson'" 
+                                          class="badge bg-info">Vendedor</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_kanban_card_content">
+                            <div class="o_kanban_card_manage_buttons">
+                                <a type="edit" class="btn btn-primary btn-sm">Editar</a>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <field name="partner_id"/>
+                                </div>
+                                <div class="col-12" t-if="record.partner_email.raw_value">
+                                    <i class="fa fa-envelope"/> <field name="partner_email"/>
+                                </div>
+                                <div class="col-12" t-if="record.seller_type.raw_value == 'leader'">
+                                    <i class="fa fa-percent"/> 
+                                    Comisión: <field name="leader_percentage"/>%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="o_kanban_card_footer">
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="active" widget="boolean_toggle"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Acción principal para vendedores externos -->
+    <record id="action_external_salesperson" model="ir.actions.act_window">
+        <field name="name">Vendedores Externos</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">gadint.external.salesperson</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Crear su primer vendedor externo!
+            </p>
+            <p>
+                Los vendedores externos son contactos que participan en el sistema de comisiones
+                pero que no son usuarios internos del sistema.
+            </p>
+            <p>
+                <b>Pasos para configurar:</b>
+            </p>
+            <ol>
+                <li>Marque el contacto como "Equipo vendedores externos" en la ficha del contacto</li>
+                <li>Cree aquí el registro del vendedor externo</li>
+                <li>Configure el tipo (Líder o Vendedor) y el porcentaje si es líder</li>
+                <li>¡Listo! Ya puede asignar este vendedor en cotizaciones</li>
+            </ol>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend Contract Form View to Add XIII Configuration -->
+    <record id="view_contract_xiii_ext" model="ir.ui.view">
+        <field name="name">hr.contract.xiii.form.inherit</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="xiii_configuration" string="XIII Configuration">
+                    <group string="XIII Settings">
+                        <field name="accumulate_xiii" 
+                               widget="boolean_toggle"
+                               help="Enable XIII salary accumulation for this contract"/>
+                        <field name="is_monthly_xiii" 
+                               invisible="not accumulate_xiii"
+                               help="Calculate XIII salary on a monthly basis"/>
+                    </group>
+                    <separator string="XIII Calculation Info" 
+                              invisible="not accumulate_xiii"/>
+                    <group invisible="not accumulate_xiii">
+                        <group string="Calculated Amounts">
+                            <field name="monthly_xiii_amount" 
+                                   widget="monetary" 
+                                   readonly="1"
+                                   help="Monthly XIII amount based on accumulated salary"/>
+                            <field name="accumulated_xiii_amount" 
+                                   widget="monetary" 
+                                   readonly="1"
+                                   help="Total accumulated XIII amount for the period"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

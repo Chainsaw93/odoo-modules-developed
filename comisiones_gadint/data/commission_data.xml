@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cron job para actualizar automáticamente el estado de comisiones pagadas -->
+        <record id="cron_update_commission_paid_status" model="ir.cron">
+            <field name="name">Actualizar Estado de Comisiones Pagadas</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">
+# Actualizar estado de comisiones pagadas
+invoices = env['account.move'].search([
+    ('move_type', '=', 'out_invoice'),
+    ('external_salesperson_ids', '!=', False),
+    ('state', '=', 'posted')
+])
+
+for invoice in invoices:
+    old_status = invoice.commission_paid
+    invoice._compute_commission_paid_status()
+    
+    if old_status != invoice.commission_paid:
+        status_text = 'PAGADA' if invoice.commission_paid else 'PENDIENTE'
+        invoice.message_post(
+            body=f'Estado de comisión actualizado automáticamente: {status_text}',
+            subject='Actualización Automática de Comisión'
+        )
+            </field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="active">True</field>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+
+        <!-- Configuración de secuencias si es necesario -->
+        <record id="seq_external_salesperson" model="ir.sequence">
+            <field name="name">Vendedores Externos</field>
+            <field name="code">gadint.external.salesperson</field>
+            <field name="prefix">VE</field>
+            <field name="padding">4</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
+        <!-- Configuración de email templates para notificaciones de comisiones -->
+        <record id="email_template_commission_paid" model="mail.template">
+            <field name="name">Notificación de Comisión Pagada</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="subject">Comisión marcada como pagada - Factura ${object.name}</field>
+            <field name="email_from">${(object.company_id.email or user.email)|safe}</field>
+            <field name="email_to">${object.partner_id.email}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Estimado/a cliente,</p>
+                    <p>Le informamos que la comisión correspondiente a la factura <strong>${object.name}</strong> 
+                       ha sido marcada como pagada automáticamente.</p>
+                    
+                    <p><strong>Detalles de la factura:</strong></p>
+                    <ul>
+                        <li>Número: ${object.name}</li>
+                        <li>Fecha: ${object.invoice_date}</li>
+                        <li>Importe: ${object.amount_total} ${object.currency_id.name}</li>
+                        <li>Vendedores externos: ${object.external_salesperson_names}</li>
+                    </ul>
+                    
+                    <p>Esta notificación se genera automáticamente cuando se vinculan pagos a facturas 
+                       que tienen vendedores externos asignados.</p>
+                    
+                    <p>Saludos cordiales,<br/>
+                    ${user.name}<br/>
+                    ${object.company_id.name}</p>
+                </div>
+            </field>
+            <field name="auto_delete">True</field>
+        </record>
+
+        <!-- DESACTIVAR el servidor de acción antiguo PRIMERO -->
+        <record id="server_action_commission_notification" model="ir.actions.server">
+            <field name="name">Código Notificación Comisión (ANTIGUA)</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">
+# ACCIÓN DESACTIVADA - Ver server_action_commission_notification_v2
+pass
+            </field>
+        </record>
+
+        <!-- Servidor de acción para ejecutar código Python (NUEVA VERSION) -->
+        <record id="server_action_commission_notification_v2" model="ir.actions.server">
+            <field name="name">Código Notificación Comisión V2</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">
+# Código para enviar notificación cuando se marca comisión como pagada
+# Solo proceder si se cambió el estado de commission_paid a True
+for record in records:
+    # Verificar si el campo existe y está marcado como pagado
+    commission_paid_exists = 'commission_paid' in record._fields
+    if commission_paid_exists and record.commission_paid and record.external_salesperson_ids:
+        # Verificar si realmente cambió de False a True (evitar notificaciones duplicadas)
+        old_values = record._origin
+        old_commission_paid_exists = old_values and 'commission_paid' in old_values._fields
+        if old_values and old_commission_paid_exists and not old_values.commission_paid:
+            # Crear mensaje en el chatter
+            message = """
+            &lt;p&gt;&lt;strong&gt;🎉 Comisión marcada como pagada automáticamente&lt;/strong&gt;&lt;/p&gt;
+            &lt;p&gt;La factura ha sido vinculada con un pago, por lo que la comisión se ha marcado como pagada.&lt;/p&gt;
+            &lt;ul&gt;
+            """
+            for salesperson in record.external_salesperson_ids:
+                message += f"&lt;li&gt;{salesperson.display_name}&lt;/li&gt;"
+            message += "&lt;/ul&gt;"
+            
+            record.message_post(
+                body=message,
+                subject='Comisión Marcada como Pagada - Automático'
+            )
+            </field>
+        </record>
+
+        <!-- DESACTIVAR la acción antigua -->
+        <record id="base_action_rule_commission_notification" model="base.automation">
+            <field name="name">Notificar Comisión Pagada (ANTIGUA)</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="trigger">on_write</field>
+            <field name="filter_domain">[('move_type', '=', 'out_invoice'), ('external_salesperson_ids', '!=', False)]</field>
+            <field name="action_server_ids" eval="[(6, 0, [ref('server_action_commission_notification')])]"/>
+            <field name="active">False</field>
+        </record>
+
+        <!-- Regla de automatización que usa el servidor de acción (NUEVA VERSION) -->
+        <record id="base_action_rule_commission_notification_v2" model="base.automation">
+            <field name="name">Notificar Comisión Pagada V2</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="trigger">on_write</field>
+            <field name="filter_domain">[('move_type', '=', 'out_invoice'), ('external_salesperson_ids', '!=', False)]</field>
+            <field name="action_server_ids" eval="[(6, 0, [ref('server_action_commission_notification_v2')])]"/>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

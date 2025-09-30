@@ -1,0 +1,50 @@
+<odoo>
+
+<record id="product_template_serial_demo" model="product.template">
+    <field name="name">Producto Serial Demo</field>
+    <field name="tracking">serial</field>
+    <field name="type">product</field>
+    <field name="uom_id" ref="uom.product_uom_unit"/>
+    <field name="uom_po_id" ref="uom.product_uom_unit"/>
+</record>
+
+<record id="product_serial_demo" model="product.product">
+    <field name="product_tmpl_id" ref="product_template_serial_demo"/>
+</record>
+
+    <!-- Ubicación interna personalizada -->
+    <record id="stock_location_test" model="stock.location">
+        <field name="name">Ubicación Demo</field>
+        <field name="location_id" ref="stock.stock_location_locations"/>
+        <field name="usage">internal</field>
+    </record>
+
+    <!-- Lotes -->
+    <record id="lot_serial_001" model="stock.lot">
+        <field name="name">SN001</field>
+        <field name="product_id" ref="product_serial_demo"/>
+    </record>
+
+    <record id="lot_serial_002" model="stock.lot">
+        <field name="name">SN002</field>
+        <field name="product_id" ref="product_serial_demo"/>
+    </record>
+
+    <!-- Quants -->
+    <record id="quant_sn001" model="stock.quant">
+        <field name="product_id" ref="product_serial_demo"/>
+        <field name="location_id" ref="stock_location_test"/>
+        <field name="lot_id" ref="lot_serial_001"/>
+        <field name="quantity">1</field>
+        <field name="inventory_quantity">1</field>
+    </record>
+
+    <record id="quant_sn002" model="stock.quant">
+        <field name="product_id" ref="product_serial_demo"/>
+        <field name="location_id" ref="stock_location_test"/>
+        <field name="lot_id" ref="lot_serial_002"/>
+        <field name="quantity">0</field>
+        <field name="inventory_quantity">0</field>
+    </record>
+
+</odoo>

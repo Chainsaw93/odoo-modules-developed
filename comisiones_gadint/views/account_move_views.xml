@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Herencia de la vista form de account.move para agregar vendedores externos -->
+    <record id="view_account_move_form_external_salesperson" model="ir.ui.view">
+        <field name="name">account.move.form.external.salesperson</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo vendedores externos después del campo partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="external_salesperson_ids" 
+                       string="Vendedores Externos"
+                       widget="many2many_tags"
+                       options="{'color_field': 'seller_type'}"
+                       readonly="1"
+                       invisible="move_type != 'out_invoice'"
+                       help="Vendedores externos asignados desde el pedido de venta. Este campo es de solo lectura."/>
+            </xpath>
+            
+            <!-- Agregar campos de comisión en una sección específica -->
+            <xpath expr="//field[@name='payment_reference']" position="after">
+                <field name="commission_paid" 
+                       widget="boolean_toggle"
+                       invisible="move_type != 'out_invoice' or not external_salesperson_ids"/>
+                <field name="payment_status_commission" 
+                       widget="badge"
+                       decoration-success="payment_status_commission == 'paid'"
+                       decoration-warning="payment_status_commission == 'partial'"
+                       decoration-danger="payment_status_commission == 'unpaid'"
+                       invisible="move_type != 'out_invoice' or not external_salesperson_ids"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia de la vista tree de account.move usando xpath más seguro -->
+    <record id="view_account_move_tree_external_salesperson" model="ir.ui.view">
+        <field name="name">account.move.tree.external.salesperson</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <!-- Usar xpath más seguro - agregar al final de la lista -->
+            <xpath expr="//list" position="inside">
+                <field name="external_salesperson_names" 
+                       string="Vendedores Externos"
+                       optional="show"/>
+                <field name="commission_paid" 
+                       string="Comisión"
+                       widget="boolean_toggle"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Herencia de la vista de búsqueda para facturas -->
+    <record id="view_account_move_search_external_salesperson" model="ir.ui.view">
+        <field name="name">account.move.search.external.salesperson</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <!-- Agregar campo de búsqueda -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="external_salesperson_ids" string="Vendedor Externo"/>
+            </xpath>
+            
+            <!-- Agregar filtros usando xpath más seguro -->
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="has_external_salesperson" 
+                        string="Con Vendedores Externos"
+                        domain="[('external_salesperson_ids', '!=', False), ('move_type', '=', 'out_invoice')]"/>
+                <filter name="commission_paid" 
+                        string="Comisión Pagada"
+                        domain="[('commission_paid', '=', True), ('move_type', '=', 'out_invoice')]"/>
+                <filter name="commission_pending" 
+                        string="Comisión Pendiente"
+                        domain="[('commission_paid', '=', False), ('external_salesperson_ids', '!=', False), ('move_type', '=', 'out_invoice')]"/>
+            </xpath>
+            
+            <!-- Agregar agrupación usando xpath más seguro -->
+            <xpath expr="//search" position="inside">
+                <group expand="0" string="Agrupar por">
+                    <filter name="group_commission_status" 
+                            string="Estado de Comisión" 
+                            context="{'group_by': 'commission_paid'}"/>
+                    <filter name="group_external_salesperson" 
+                            string="Vendedor Externo" 
+                            context="{'group_by': 'external_salesperson_ids'}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista específica para facturas con comisiones -->
+    <record id="view_invoice_commission_form" model="ir.ui.view">
+        <field name="name">account.move.commission.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar notebook específico para información de comisiones -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Información de Comisiones" 
+                      name="commission_info"
+                      invisible="move_type != 'out_invoice' or not external_salesperson_ids">
+                    <group>
+                        <group string="Vendedores Externos">
+                            <field name="external_salesperson_ids" nolabel="1" readonly="1" 
+                                   context="{'invoice_id': id}">
+                                <list string="Vendedores Asignados" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="seller_type" widget="badge"/>
+                                    <field name="partner_id"/>
+                                    <field name="commission_rate_display" 
+                                           string="% Comisión"
+                                           readonly="1"/>
+                                    <field name="commission_amount_invoice" 
+                                           string="Comisión Calculada"
+                                           widget="monetary"/>
+                                </list>
+                            </field>
+                        </group>
+                        
+                        <group string="Estado de Comisión">
+                            <field name="commission_paid" readonly="1"/>
+                            <field name="payment_status_commission" readonly="1"/>
+                            <field name="related_payment_id" readonly="1" invisible="not related_payment_id"/>
+                            <field name="amount_paid_commission" readonly="1"/>
+                            <field name="amount_untaxed" readonly="1" string="Subtotal (Base Comisiones)"/>
+                            <field name="total_commission_amount" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Detalle de Comisiones" invisible="not external_salesperson_ids">
+                        <field name="commission_detail" readonly="1" widget="text" nolabel="1"/>
+                    </group>
+                    
+                    <div class="alert alert-success" 
+                         role="alert" 
+                         invisible="not commission_paid">
+                        <p><strong><i class="fa fa-check-circle"/> Comisión Marcada como Pagada</strong></p>
+                        <p>Esta factura ha sido vinculada con pagos, por lo que la comisión 
+                           se ha marcado automáticamente como pagada para todos los vendedores externos asignados.</p>
+                    </div>
+                    
+                    <div class="alert alert-info" 
+                         role="alert" 
+                         invisible="commission_paid">
+                        <p><strong><i class="fa fa-info-circle"/> Comisión Pendiente</strong></p>
+                        <p>Esta factura aún no ha sido vinculada con pagos completos. 
+                           La comisión se marcará automáticamente como pagada cuando se registren los pagos correspondientes.</p>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+      <!-- Tree: mostrar importe cobrado -->
+    <record id="view_move_tree_gadint_commission_paid" model="ir.ui.view">
+    <field name="name">account.move.tree.gadint.commission.paid</field>
+    <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//list" position="inside">
+        <field name="amount_paid_commission" string="Importe Cobrado"/>
+        <field name="total_commission_amount" string="Comisión Calculada"/>
+        </xpath>
+    </field>
+    </record>
+
+    <!-- Acción para facturas con vendedores externos -->
+    <record id="action_invoice_external_salesperson" model="ir.actions.act_window">
+        <field name="name">Facturas con Vendedores Externos</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('external_salesperson_ids', '!=', False),
+            ('move_type', '=', 'out_invoice')
+        ]</field>
+        <field name="context">{
+            'default_move_type': 'out_invoice',
+            'search_default_has_external_salesperson': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡No hay facturas con vendedores externos!
+            </p>
+            <p>
+                Aquí encontrará todas las facturas que tienen vendedores externos asignados 
+                y puede monitorear el estado de las comisiones.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para comisiones pendientes -->
+    <record id="action_invoice_commission_pending" model="ir.actions.act_window">
+        <field name="name">Comisiones Pendientes</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('external_salesperson_ids', '!=', False),
+            ('move_type', '=', 'out_invoice'),
+            ('commission_paid', '=', False)
+        ]</field>
+        <field name="context">{
+            'default_move_type': 'out_invoice',
+            'search_default_commission_pending': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Todas las comisiones están pagadas!
+            </p>
+            <p>
+                Aquí encontrará las facturas con vendedores externos que tienen comisiones pendientes de pago.
+            </p>
+        </field>
+    </record>
+</odoo>

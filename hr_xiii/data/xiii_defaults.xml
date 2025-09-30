@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Default XIII Configuration for Dominican Republic -->
+    <record id="default_xiii_config" model="ir.config_parameter">
+        <field name="key">hr_xiii.default_init_date</field>
+        <field name="value">2024-12-01</field>
+    </record>
+    
+    <record id="default_xiii_end_config" model="ir.config_parameter">
+        <field name="key">hr_xiii.default_end_date</field>
+        <field name="value">2025-11-30</field>
+    </record>
+    
+    <record id="default_xiii_pay_config" model="ir.config_parameter">
+        <field name="key">hr_xiii.default_pay_date</field>
+        <field name="value">2025-12-25</field>
+    </record>
+
+    <!-- Update company with default values if not set -->
+    <function model="res.config.settings" name="_setup_default_xiii_config"/>
+</odoo>

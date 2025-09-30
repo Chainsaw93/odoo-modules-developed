@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_account_asset_form_inherit_prestamo" model="ir.ui.view">
+        <field name="name">account.asset.form.prestamo.inherit</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+        <field name="arch" type="xml">
+
+        <xpath expr="//page[@name='main_page']/group/group[4]" position="after">
+            <group string="DATOS DE PRÉSTAMO">
+                <field name="prestamo" string="Préstamo"/>
+                <field name="responsable" string="Responsable" invisible="not prestamo"/>
+                <field name="ubicacion" string="Ubicación" invisible="not prestamo"/>
+            </group>
+        </xpath>
+
+        </field>
+    </record>
+</odoo>
+

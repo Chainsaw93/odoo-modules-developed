@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- ✅ Template de prueba ultra-básico que NO puede causar errores -->
+    <t t-name="mrp_landed_costs_overview.SimpleTest">
+        <div class="alert alert-info">
+            <h4>🧪 Módulo MRP Landed Costs cargado correctamente</h4>
+            <p>Este es un template de prueba básico.</p>
+        </div>
+    </t>
+</templates>

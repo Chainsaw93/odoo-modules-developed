@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <div t-name="mo_bom_overview.MoBomOverview" class="o_action">
+        <Layout display="{ controlPanel: {} }">
+            <t t-set-slot="control-panel-create-button">
+                <div class="d-flex gap-1">
+                    <button class="btn btn-secondary btn-sm" t-on-click="manualRefresh" 
+                            title="Actualizar datos manualmente">
+                        <i class="fa fa-refresh"/> Refresh
+                    </button>
+                    <button class="btn btn-primary" t-on-click="onPrint">Print</button>
+                </div>
+            </t>
+
+            <div class="o_mrp_bom_report_page py-3 py-lg-5 px-0 bg-view">
+                <div t-if="state.data.lines">                    
+                    <!-- Header responsive con indicador de estado -->
+                    <div class="px-3 mb-3 mb-lg-5 o_status_container">
+                        <!-- Indicador de estado para órdenes no producidas -->
+                        <div t-if="!state.data.is_production_done" class="o_status_badge">
+                            Borrador
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 col-lg-8">
+                                <h1 class="mb-2">BOM Overview - <t t-esc="state.data.production_name"/></h1>
+                                <h3 class="mb-2" t-esc="state.data.lines.name"/>
+                                <hr t-if="state.data.lines.code"/>
+                                <h6 t-if="state.data.lines.code">Reference: <t t-esc="state.data.lines.code"/></h6>
+                            </div>
+                            <!-- Información de costo en header - responsive -->
+                            <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+                                <div t-attf-class="alert {{state.data.is_production_done ? 'alert-info' : 'alert-warning'}}">
+                                    <strong>
+                                        <span t-if="state.data.is_production_done">Costo Unitario Real</span>
+                                        <span t-else="">Costo Unitario Estimado</span>
+                                    </strong><br/>
+                                    <span class="monetary-value" style="font-size: 1.2em;" t-esc="getUnitCost()"/>
+                                        <!-- AGREGAR información de moneda -->
+                                        <small class="d-block text-info mt-1">
+                                            <i class="fa fa-money-bill-wave"/> <t t-esc="getCurrencyDisplayInfo().displayText"/>
+                                        </small>
+                                    <small class="d-block text-muted">
+                                        <span t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length">
+                                            <i class="fa fa-usd"/> Incluye Costos indirectos
+                                        </span>
+                                        <span t-else="">
+                                            Sin Costos indirectos aplicados
+                                        </span>
+                                        <!-- Indicador adicional para costos estimados -->
+                                        <span t-if="!state.data.is_production_done" class="d-block text-warning">
+                                            <i class="fa fa-exclamation-triangle"/> Valores no definitivos
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Alerta de variación de costos - responsive -->
+                        <div t-if="state.data.lines.cost_variance and Math.abs(state.data.lines.cost_variance) > 0.01" 
+                            t-attf-class="alert alert-{{state.data.lines.is_over_budget ? 'warning' : 'success'}} mt-3">
+                            <div class="row">
+                                <div class="col-12 col-md-8">
+                                    <strong>
+                                        <i t-attf-class="fa fa-{{state.data.lines.is_over_budget ? 'exclamation-triangle' : 'check-circle'}}"/>
+                                        <span t-if="state.data.is_production_done">Análisis de Variación de Costos</span>
+                                        <span t-else="">Proyección de Variación de Costos</span>
+                                    </strong>
+                                    <p class="mb-0 mt-1">
+                                        <span t-if="state.data.lines.is_over_budget">El costo 
+                                            <span t-if="state.data.is_production_done">real</span>
+                                            <span t-else="">estimado</span> excede el planificado
+                                        </span>
+                                        <span t-else="">El costo 
+                                            <span t-if="state.data.is_production_done">real</span>
+                                            <span t-else="">estimado</span> está por debajo del planificado
+                                        </span>
+                                        por <strong class="monetary-value" t-esc="formatMonetary(Math.abs(state.data.lines.cost_variance), state.data.lines.currency_id)"/>
+                                        (<t t-esc="Math.abs(state.data.lines.cost_variance_percentage).toFixed(1)"/>%)
+                                    </p>
+                                </div>
+                                <div class="col-12 col-md-4 mt-2 mt-md-0">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <small class="text-muted">Planificado</small><br/>
+                                            <span class="monetary-value" t-esc="formatMonetary(state.data.lines.bom_cost, state.data.lines.currency_id)"/>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">
+                                                <span t-if="state.data.is_production_done">Real</span>
+                                                <span t-else="">Estimado</span>
+                                            </small><br/>
+                                            <strong class="monetary-value" t-esc="formatMonetary(state.data.lines.prod_cost, state.data.lines.currency_id)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Wrapper responsive para la tabla -->
+                    <div class="table-responsive-custom px-3">
+                        <table class="o_mrp_bom_expandable table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied">UoM</th>
+                                    <th t-if="state.showCosts" class="text-end d-xs-none">
+                                        BoM Cost 
+                                        <small class="text-muted d-block">(<t t-esc="getCurrencySymbol()"/>)</small>
+                                    </th>
+                                    <th t-if="state.showCosts" class="text-end">
+                                        Real Cost
+                                        <small class="text-muted d-block">(<t t-esc="getCurrencySymbol()"/>)</small>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Línea principal -->
+                                <tr class="table-primary">
+                                    <td>
+                                        <strong t-esc="state.data.lines.name"/>
+                                        <span t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length" 
+                                              class="badge badge-info ml-1 d-sm-none d-md-inline">
+                                            <i class="fa fa-usd"/> LC
+                                        </span>
+                                        <!-- Versión móvil del badge -->
+                                        <div t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length" 
+                                             class="d-sm-block d-md-none mt-1">
+                                            <small class="text-info">
+                                                <i class="fa fa-usd"/> Costos indirectos aplicados
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td class="text-end" t-esc="state.data.lines.quantity"/>
+                                    <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied" t-esc="state.data.lines.uom_name"/>
+                                    <td t-if="state.showCosts" class="text-end d-xs-none monetary-value" 
+                                        t-esc="formatMonetary(state.data.lines.bom_cost, state.data.lines.currency_id)"/>
+                                    <td t-if="state.showCosts" class="text-end">
+                                        <strong class="monetary-value" t-esc="formatMonetary(state.data.lines.prod_cost, state.data.lines.currency_id)"/>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Componentes -->
+                                <t t-foreach="state.data.lines.components || []" t-as="component" t-key="component_index">
+                                    <tr>
+                                        <td>
+                                            <span t-attf-style="margin-left: {{component.level * 15}}px"/>
+                                            <span t-esc="component.name"/>
+                                            <span t-if="component.has_landed_costs" class="text-info ml-1 d-sm-none d-md-inline">
+                                                <i class="fa fa-usd" title="Incluye costos indirectos"/>
+                                            </span>
+                                        </td>
+                                        <td class="text-end" t-esc="component.quantity"/>
+                                        <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied" t-esc="component.uom_name"/>
+                                        <td t-if="state.showCosts" class="text-end text-muted d-xs-none monetary-value" 
+                                            t-esc="formatMonetary(component.bom_cost, component.currency_id)"/>
+                                        <td t-if="state.showCosts" class="text-end">
+                                            <span t-if="component.prod_cost" class="monetary-value"
+                                                  t-esc="formatMonetary(component.prod_cost, component.currency_id)"/>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Sub-componentes (replenishments) -->
+                                    <t t-foreach="component.components || []" t-as="subcomp" t-key="subcomp_index">
+                                        <tr>
+                                            <td>
+                                                <span t-attf-style="margin-left: {{subcomp.level * 15}}px"/>
+                                                <span t-esc="subcomp.name"/>
+                                            </td>
+                                            <td class="text-end" t-esc="subcomp.quantity"/>
+                                            <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied" t-esc="subcomp.uom_name"/>
+                                            <td t-if="state.showCosts" class="text-end text-muted d-xs-none monetary-value" 
+                                                t-esc="formatMonetary(subcomp.bom_cost, subcomp.currency_id)"/>
+                                            <td t-if="state.showCosts" class="text-end">
+                                                <span t-if="subcomp.prod_cost" class="monetary-value"
+                                                      t-esc="formatMonetary(subcomp.prod_cost, subcomp.currency_id)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                
+                                <!-- Operaciones -->
+                                <t t-if="state.showOperations and state.data.lines.operations">
+                                    <tr style="cursor: pointer;" t-on-click="toggleOperations">
+                                        <td>
+                                            <span t-attf-class="fa {{state.operationsCollapsed ? 'fa-caret-right' : 'fa-caret-down'}}" style="margin-right: 5px;"/>
+                                            <span style="margin-left: 15px"/>
+                                            Operaciones
+                                        </td>
+                                        <td class="text-end" t-esc="getTotalOperationsHours()"/>
+                                        <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied">hours</td>
+                                        <td t-if="state.showCosts" class="text-end d-xs-none monetary-value">
+                                            <span t-esc="getTotalOperationsCost()"/>
+                                        </td>
+                                        <td t-if="state.showCosts"/>
+                                    </tr>
+                                    
+                                    <t t-if="!state.operationsCollapsed" t-foreach="state.data.lines.operations" t-as="operation" t-key="operation_index">
+                                        <tr>
+                                            <td>
+                                                <span style="margin-left: 30px"/>
+                                                <span t-esc="operation.name"/>
+                                            </td>
+                                            <td class="text-end" t-esc="operation.quantity"/>
+                                            <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied" t-esc="operation.uom_name"/>
+                                            <td t-if="state.showCosts" class="text-end text-muted d-xs-none monetary-value" 
+                                                t-esc="formatMonetary(operation.bom_cost, operation.currency_id)"/>
+                                            <td t-if="state.showCosts"/>
+                                        </tr>
+                                    </t>
+                                </t>
+                                
+                                <!-- Byproducts -->
+                                <t t-if="state.data.lines.byproducts and state.data.lines.byproducts.length">
+                                    <tr style="cursor: pointer;" t-on-click="toggleByproducts">
+                                        <td>
+                                            <span t-attf-class="fa {{state.byproductsCollapsed ? 'fa-caret-right' : 'fa-caret-down'}}" style="margin-right: 5px;"/>
+                                            <span style="margin-left: 15px"/>
+                                            Byproducts
+                                        </td>
+                                        <td class="text-end" t-esc="state.data.lines.byproducts.length"/>
+                                        <td class="d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied"/>
+                                        <td t-if="state.showCosts" class="text-end d-xs-none monetary-value">
+                                            <span t-esc="getTotalByproductsCost()"/>
+                                        </td>
+                                        <td t-if="state.showCosts"/>
+                                    </tr>
+                                    
+                                    <t t-if="!state.byproductsCollapsed" t-foreach="state.data.lines.byproducts" t-as="byproduct" t-key="byproduct_index">
+                                        <tr>
+                                            <td>
+                                                <span style="margin-left: 30px"/>
+                                                <span t-esc="byproduct.name"/>
+                                            </td>
+                                            <td class="text-end" t-esc="byproduct.quantity"/>
+                                            <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied" t-esc="byproduct.uom_name"/>
+                                            <td t-if="state.showCosts" class="text-end text-muted d-xs-none monetary-value" 
+                                                t-esc="formatMonetary(byproduct.bom_cost, byproduct.currency_id)"/>
+                                            <td t-if="state.showCosts" class="text-end">
+                                                <span class="monetary-value" t-esc="formatMonetary(byproduct.prod_cost, byproduct.currency_id)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                
+                                <!-- Costos Indirectos (Landed Costs) -->
+                                <t t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length">
+                                    <tr style="cursor: pointer;" t-on-click="toggleIndirectCosts" class="table-warning">
+                                        <td>
+                                            <span t-attf-class="fa {{state.indirectCostsCollapsed ? 'fa-caret-right' : 'fa-caret-down'}}" style="margin-right: 5px;"/>
+                                            <span style="margin-left: 15px"/>
+                                            <i class="fa fa-usd text-info"/> Costos Indirectos
+                                        </td>
+                                        <td class="text-end" t-esc="state.data.lines.indirect_costs.length"/>
+                                        <td class="d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied">Items</td>
+                                        <td t-if="state.showCosts" class="text-end d-xs-none">0.00</td>
+                                        <td t-if="state.showCosts" class="text-end">
+                                            <strong class="monetary-value" t-esc="getTotalIndirectCosts()"/>
+                                        </td>
+                                    </tr>
+                                    
+                                    <t t-if="!state.indirectCostsCollapsed" t-foreach="state.data.lines.indirect_costs" t-as="indirect_cost" t-key="indirect_cost_index">
+                                        <tr>
+                                            <td>
+                                                <span style="margin-left: 30px"/>
+                                                <span t-esc="indirect_cost.name"/>
+                                                <small t-if="indirect_cost.date" class="text-muted d-block d-sm-none">
+                                                    <t t-esc="indirect_cost.date"/>
+                                                </small>
+                                                <small t-if="indirect_cost.date" class="text-muted d-none d-sm-inline ml-2">
+                                                    (<t t-esc="indirect_cost.date"/>)
+                                                </small>
+                                            </td>
+                                            <td class="text-end">1</td>
+                                            <td class="text-start d-sm-none d-lg-table-cell" t-if="state.data.is_uom_applied">unidad</td>
+                                            <td t-if="state.showCosts" class="text-end d-xs-none">0.00</td>
+                                            <td t-if="state.showCosts" class="text-end monetary-value" 
+                                                t-esc="formatMonetary(indirect_cost.amount, indirect_cost.currency_id)"/>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Sección de totales responsive -->
+                    <div class="row mt-4 px-3">
+                        <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                            <!-- Información de landed costs si existen -->
+                            <div t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length" 
+                                class="alert alert-info">
+                                <h6>
+                                    <i class="fa fa-usd"/> Impacto de Costos Indirectos 
+                                    <small class="text-muted">(<t t-esc="getCurrencyName()"/>)</small>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6 mb-2 mb-sm-0">
+                                        <small>Costo BOM original:</small><br/>
+                                        <strong class="monetary-value" t-esc="formatMonetary(state.data.lines.bom_cost, state.data.lines.currency_id)"/>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <small>Costo real (con Costos indirectos):</small><br/>
+                                        <strong class="monetary-value" t-esc="formatMonetary(state.data.lines.prod_cost, state.data.lines.currency_id)"/>
+                                    </div>
+                                </div>
+                                <hr class="my-2"/>
+                                <div class="text-center">
+                                    <small>Incremento por Costos indirectos:</small><br/>
+                                    <span class="text-warning">
+                                        <strong class="monetary-value" t-esc="getTotalIndirectCosts()"/>
+                                        (<t t-esc="formatMonetary(getTotalIndirectCostsValue() / (state.data.lines.quantity || 1), state.data.lines.currency_id)"/> por unidad)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                            <div class="col-12 col-lg-6">
+                                <!-- Tabla de totales responsive -->
+                                <div class="totals-section">
+                                    <!-- AGREGAR header con información de moneda -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0"><i class="fa fa-calculator"/> Resumen de Costos</h6>
+                                        <small class="text-muted">
+                                            <i class="fa fa-money-bill-wave"/> <t t-esc="getCurrencyName()"/>
+                                        </small>
+                                    </div>
+                                    
+                                    <table class="table table-sm table-borderless">
+                                    <tbody>
+                                        <!-- Costo unitario real (principal) -->
+                                        <tr class="table-primary">
+                                            <td class="text-end"><strong><i class="fa fa-calculator"/> Costo unitario real</strong></td>
+                                            <td class="text-end">
+                                                <strong class="monetary-value" t-esc="getUnitCost()"/>
+                                                <small class="text-muted d-block">
+                                                    <span t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length">
+                                                        Incluye Costos indirectos
+                                                    </span>
+                                                    <span t-else="">
+                                                        Sin Costos indirectos
+                                                    </span>
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Breakdown de costos -->
+                                        <tr class="table-light d-sm-none">
+                                            <td colspan="2" class="text-center text-muted">
+                                                <small><strong>Desglose de Costos</strong></small>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Componentes -->
+                                        <tr>
+                                            <td class="text-end">
+                                                <i class="fa fa-cube text-primary"/> Componentes
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="(state.data.lines.components || []).length"/> items
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="monetary-value" t-esc="getTotalComponentsCost()"/>
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="getComponentsCostPerUnit()"/> por unidad
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Operaciones -->
+                                        <tr t-if="state.data.lines.operations and state.data.lines.operations.length">
+                                            <td class="text-end">
+                                                <i class="fa fa-cogs text-warning"/> Operaciones
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="state.data.lines.operations.length"/> items
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="monetary-value" t-esc="getTotalOperationsCostFormatted()"/>
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="getOperationsCostPerUnit()"/> por unidad
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Costos indirectos (Landed Costs) -->
+                                        <tr t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length" class="table-warning">
+                                            <td class="text-end">
+                                                <i class="fa fa-usd text-info"/> Costos indirectos
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="state.data.lines.indirect_costs.length"/> conceptos
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="monetary-value" t-esc="getTotalIndirectCosts()"/>
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="formatMonetary(getTotalIndirectCostsValue() / (state.data.lines.quantity || 1), state.data.lines.currency_id)"/> por unidad
+                                                </small>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Separador -->
+                                        <tr>
+                                            <td colspan="2"><hr class="my-1"/></td>
+                                        </tr>
+                                        
+                                        <!-- Total general -->
+                                        <tr class="table-success">
+                                            <td class="text-end">
+                                                <strong><i class="fa fa-calculator"/> Total producción</strong>
+                                                <small class="text-muted d-none d-sm-block">
+                                                    <t t-esc="state.data.lines.quantity"/> <t t-esc="state.data.lines.uom_name"/>
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="monetary-value" t-esc="formatMonetary(state.data.lines.prod_cost, state.data.lines.currency_id)"/>
+                                                <small class="text-success d-block">
+                                                    <i class="fa fa-check-circle"/> Final
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección adicional: Detalles de Landed Costs (si existen) -->
+                    <div class="row mt-3 px-3" t-if="state.data.lines.indirect_costs and state.data.lines.indirect_costs.length">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-usd text-info"/> Detalle de Costos Indirectos
+                                        <span class="badge badge-info float-right" t-esc="state.data.lines.indirect_costs.length"/>
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row landed-costs-details">
+                                        <t t-foreach="state.data.lines.indirect_costs" t-as="cost" t-key="cost_index">
+                                            <div class="col-12 col-sm-6 col-lg-4 mb-2">
+                                                <div class="border rounded p-2">
+                                                    <small class="text-muted">Concepto:</small><br/>
+                                                    <strong t-esc="cost.name"/><br/>
+                                                    <small class="text-muted">Monto:</small>
+                                                    <span class="text-info monetary-value" t-esc="formatMonetary(cost.amount, cost.currency_id)"/>
+                                                    <small t-if="cost.date" class="text-muted d-block">
+                                                        Fecha: <t t-esc="cost.date"/>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div t-else="" class="d-flex align-items-center justify-content-center h-50">
+                    <h4 class="text-muted">No data available.</h4>
+                </div>
+            </div>
+        </Layout>
+    </div>
+</templates>

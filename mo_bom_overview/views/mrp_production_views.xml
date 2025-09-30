@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Reporte PDF para MO BOM Overview -->
+        <record id="action_report_mo_bom_overview" model="ir.actions.report">
+            <field name="name">MO BOM Overview</field>
+            <field name="model">mrp.production</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">mo_bom_overview.report_mo_bom_overview_document</field>
+            <field name="report_file">mo_bom_overview.report_mo_bom_overview_document</field>
+            <field name="print_report_name">'Overview - ' + object.name.replace('/', '-')</field>
+        </record>
+
+        <!-- Template del reporte PDF actualizado con landed costs -->
+        <template id="report_mo_bom_overview_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="mo_data" t-value="doc.get_mo_bom_data()"/>
+                    <t t-set="report_title" t-value="'Overview - ' + doc.name"/>
+                    <t t-call="web.external_layout">
+                        <t t-set="title" t-value="report_title"/>
+                        <div class="page">
+                            <!-- Header mejorado -->
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2>BOM Overview - <span t-esc="doc.name"/></h2>
+                                    <h4 t-esc="mo_data['lines']['name']"/>
+                                    <hr t-if="mo_data['lines']['code']"/>
+                                    <h6 t-if="mo_data['lines']['code']">Reference: <span t-esc="mo_data['lines']['code']"/></h6>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <!-- Resumen de costos en el header -->
+                                    <div class="alert alert-info">
+                                        <strong>Costo Unitario Real</strong><br/>
+                                        <span style="font-size: 1.5em;" t-esc="'{:,.2f}'.format(mo_data['lines']['unit_cost'] or 0)"/>
+                                        <small t-esc="mo_data['lines']['currency']['symbol'] or '$'"/>
+                                        
+                                        <t t-if="mo_data['lines'].get('indirect_costs') and len(mo_data['lines']['indirect_costs']) > 0">
+                                            <br/><small class="text-warning">
+                                                <i class="fa fa-usd"/> Incluye costos indirectos
+                                            </small>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alerta de variación de costos -->
+                            <t t-if="mo_data['lines'].get('cost_variance', 0) != 0 and abs(mo_data['lines']['cost_variance']) > 0.01">
+                                <div t-attf-class="alert alert-{{mo_data['lines']['is_over_budget'] and 'warning' or 'success'}}">
+                                    <strong>
+                                        <i t-attf-class="fa fa-{{mo_data['lines']['is_over_budget'] and 'exclamation-triangle' or 'check-circle'}}"/>
+                                        Análisis de Variación de Costos
+                                    </strong>
+                                    <div class="row mt-2">
+                                        <div class="col-3">
+                                            <small>Costo Planificado (BOM):</small><br/>
+                                            <span t-esc="'{:,.2f}'.format(mo_data['lines']['bom_cost'] or 0)"/>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Costo Real:</small><br/>
+                                            <span t-esc="'{:,.2f}'.format(mo_data['lines']['prod_cost'] or 0)"/>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Variación:</small><br/>
+                                            <span t-esc="'{:,.2f}'.format(abs(mo_data['lines']['cost_variance'] or 0))"/>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Porcentaje:</small><br/>
+                                            <span t-esc="'{:.1f}%'.format(abs(mo_data['lines']['cost_variance_percentage'] or 0))"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Tabla principal -->
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Quantity</th>
+                                        <th class="text-end">UoM</th>
+                                        <th class="text-end">Costo BOM</th>
+                                        <th class="text-end">Costo Real</th>
+                                        <th class="text-end">Diferencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Producto principal -->
+                                    <tr style="font-weight: bold; background-color: #e8f4f8;">
+                                        <td>
+                                            <span t-esc="mo_data['lines']['name']"/>
+                                            <span t-if="mo_data['lines'].get('indirect_costs') and len(mo_data['lines']['indirect_costs']) > 0" 
+                                                  class="badge badge-warning ml-2">
+                                                <i class="fa fa-usd"/> LC
+                                            </span>
+                                        </td>
+                                        <td class="text-end" t-esc="mo_data['lines']['quantity']"/>
+                                        <td class="text-end" t-esc="mo_data['lines']['uom_name']"/>
+                                        <td class="text-end" t-esc="'{:,.2f}'.format(mo_data['lines']['bom_cost'] or 0)"/>
+                                        <td class="text-end" t-esc="'{:,.2f}'.format(mo_data['lines']['prod_cost'] or 0)"/>
+                                        <td class="text-end">
+                                            <span t-attf-style="color: {{(mo_data['lines']['cost_variance'] or 0) > 0 and 'red' or 'green'}}">
+                                                <t t-esc="'{:,.2f}'.format(abs(mo_data['lines']['cost_variance'] or 0))"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Componentes -->
+                                    <t t-foreach="mo_data['lines']['components'] or []" t-as="component">
+                                        <tr>
+                                            <td style="padding-left: 20px;">
+                                                <span t-esc="component['name']"/>
+                                                <t t-if="component.get('has_landed_costs')">
+                                                    <small class="text-info"> <i class="fa fa-usd"/> LC</small>
+                                                </t>
+                                            </td>
+                                            <td class="text-end" t-esc="component['quantity']"/>
+                                            <td class="text-end" t-esc="component['uom_name']"/>
+                                            <td class="text-end text-muted" t-esc="'{:,.2f}'.format(component['bom_cost'] or 0)"/>
+                                            <td class="text-end" t-esc="'{:,.2f}'.format(component['prod_cost'] or 0)"/>
+                                            <td class="text-end">
+                                                <t t-set="comp_variance" t-value="(component['prod_cost'] or 0) - (component['bom_cost'] or 0)"/>
+                                                <span t-attf-style="color: {{comp_variance > 0 and 'red' or 'green'}}">
+                                                    <t t-esc="'{:,.2f}'.format(abs(comp_variance))"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <!-- Operaciones -->
+                                    <t t-if="mo_data['lines']['operations']">
+                                        <tr style="background-color: #f8f9fa;">
+                                            <td style="padding-left: 20px; font-weight: bold;">
+                                                <i class="fa fa-cogs"/> Operaciones (<t t-esc="len(mo_data['lines']['operations'])"/>)
+                                            </td>
+                                            <td class="text-end">-</td>
+                                            <td>horas</td>
+                                            <td class="text-end" t-esc="'{:,.2f}'.format(sum(op.get('bom_cost', 0) for op in mo_data['lines']['operations']))"/>
+                                            <td class="text-end" t-esc="'{:,.2f}'.format(sum(op.get('bom_cost', 0) for op in mo_data['lines']['operations']))"/>
+                                            <td class="text-end">0.00</td>
+                                        </tr>
+                                        <t t-foreach="mo_data['lines']['operations']" t-as="operation">
+                                            <tr>
+                                                <td style="padding-left: 40px;" t-esc="operation['name']"/>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(operation['quantity'])"/>
+                                                <td t-esc="operation['uom_name']"/>
+                                                <td class="text-end text-muted" t-esc="'{:,.2f}'.format(operation['bom_cost'] or 0)"/>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(operation['bom_cost'] or 0)"/>
+                                                <td class="text-end">0.00</td>
+                                            </tr>
+                                        </t>
+                                    </t>
+
+                                    <!-- Costos Indirectos (Landed Costs) -->
+                                    <t t-if="mo_data['lines']['indirect_costs']">
+                                        <tr style="background-color: #fff3cd;">
+                                            <td style="padding-left: 20px; font-weight: bold;">
+                                                <i class="fa fa-usd text-info"/> Costos Indirectos (<t t-esc="len(mo_data['lines']['indirect_costs'])"/>)
+                                            </td>
+                                            <td class="text-end">-</td>
+                                            <td>items</td>
+                                            <td class="text-end">0.00</td>
+                                            <td class="text-end" t-esc="'{:,.2f}'.format(sum(cost.get('amount', 0) for cost in mo_data['lines']['indirect_costs']))"/>
+                                            <td class="text-end text-warning">
+                                                <strong>+<t t-esc="'{:,.2f}'.format(sum(cost.get('amount', 0) for cost in mo_data['lines']['indirect_costs']))"/></strong>
+                                            </td>
+                                        </tr>
+                                        <t t-foreach="mo_data['lines']['indirect_costs']" t-as="cost">
+                                            <tr>
+                                                <td style="padding-left: 40px;">
+                                                    <span t-esc="cost['name']"/>
+                                                    <small class="text-muted">
+                                                        <t t-if="cost.get('date')"> - <t t-esc="cost['date']"/></t>
+                                                    </small>
+                                                </td>
+                                                <td class="text-end">-</td>
+                                                <td>-</td>
+                                                <td class="text-end">0.00</td>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(cost['amount'])"/>
+                                                <td class="text-end text-warning">+<t t-esc="'{:,.2f}'.format(cost['amount'])"/></td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                            
+                            <!-- Sección de totales mejorada -->
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <!-- Información adicional -->
+                                    <t t-if="mo_data['lines'].get('indirect_costs') and len(mo_data['lines']['indirect_costs']) > 0">
+                                        <div class="alert alert-light">
+                                            <h6><i class="fa fa-info-circle"/> Impacto de Costos Indirectos</h6>
+                                            <ul class="mb-0">
+                                                <li>Conceptos aplicados: <strong t-esc="len(mo_data['lines']['indirect_costs'])"/></li>
+                                                <li>Monto total: <strong t-esc="'{:,.2f}'.format(sum(cost.get('amount', 0) for cost in mo_data['lines']['indirect_costs']))"/></li>
+                                                <li>Impacto por unidad: <strong t-esc="'{:,.2f}'.format(sum(cost.get('amount', 0) for cost in mo_data['lines']['indirect_costs']) / mo_data['lines']['quantity'])"/></li>
+                                            </ul>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div class="col-6">
+                                    <table class="table table-sm table-borderless">
+                                        <tbody>
+                                            <tr class="table-primary">
+                                                <td class="text-end"><strong>Costo unitario real</strong></td>
+                                                <td class="text-end"><strong t-esc="'{:,.2f}'.format(mo_data['lines']['unit_cost'] or 0)"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-end">Costo de componentes</td>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(sum(comp['prod_cost'] for comp in mo_data['lines']['components'] or []))"/>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-end">Costo de operaciones</td>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(sum(op.get('bom_cost', 0) for op in mo_data['lines']['operations'] or []))"/>
+                                            </tr>
+                                            <tr class="table-warning">
+                                                <td class="text-end"><i class="fa fa-usd"/> Costos Indirectos</td>
+                                                <td class="text-end" t-esc="'{:,.2f}'.format(sum(cost.get('amount', 0) for cost in mo_data['lines']['indirect_costs'] or []))"/>
+                                            </tr>
+                                            <tr class="table-success">
+                                                <td class="text-end"><strong>Total producción</strong></td>
+                                                <td class="text-end"><strong t-esc="'{:,.2f}'.format(mo_data['lines']['prod_cost'] or 0)"/></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Acción cliente para el MO BOM Overview -->
+        <record id="action_mo_bom_overview" model="ir.actions.client">
+            <field name="name">BOM Overview</field>
+            <field name="tag">mo_bom_overview</field>
+            <field name="context">{'model': 'report.mo.bom.overview'}</field>
+        </record>
+
+        <!-- Heredar vista de formulario de mrp.production -->
+        <record id="mrp_production_form_view_bom_overview" model="ir.ui.view">
+            <field name="name">mrp.production.form.bom.overview</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_view_mo_bom_overview" type="object" 
+                            class="oe_stat_button" icon="fa-sitemap">
+                        <div class="o_stat_info">
+                            <span class="o_stat_text">BOM Overview</span>
+                        </div>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

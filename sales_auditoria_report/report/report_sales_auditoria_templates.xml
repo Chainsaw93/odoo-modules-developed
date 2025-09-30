@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción que invoca el QWeb‐PDF -->
+    <report
+        id="action_report_ventas_auditoria_pdf"
+        model="wizard.ventas.auditoria"
+        string="Reporte Ventas Auditoría"
+        report_type="qweb-pdf"
+        name="sales_auditoria_report.report_sales_auditoria_pdf"
+        file="sales_auditoria_report.report_sales_auditoria_pdf"
+        attachment_use="False"
+    />
+
+    <!-- Plantilla QWeb para generar el PDF -->
+    <template id="report_sales_auditoria_pdf">
+        <t t-call="web.internal_layout">
+            <t t-set="doc_ids" t-value="doc.ids"/>
+            <t t-set="doc_model" t-value="doc._name"/>
+
+            <div class="page">
+                <div>
+                    <h2>REPORTE DE VENTAS AUDITORES</h2>
+                    <div style="text-align: right; font-size: 12px; margin-bottom: 5px;">
+                        <strong>Período:</strong>
+                        <t t-esc="data['date_from']"/> - <t t-esc="data['date_to']"/>
+                    </div>
+                    <div style="text-align: right; font-size: 12px; margin-bottom: 15px;">
+                        <strong>Moneda:</strong> Pesos (RD)
+                    </div>
+                </div>
+
+                <table class="table table-sm" style="width:100%; border-collapse: collapse;" border="1">
+                    <thead>
+                        <tr>
+                            <th style="font-size:10px;">No. Factura</th>
+                            <th style="font-size:10px;">Fecha</th>
+                            <th style="font-size:10px;">Cliente</th>
+                            <th style="font-size:10px;">Ingreso Neto</th>
+                            <th style="font-size:10px;">ITBIS</th>
+                            <th style="font-size:10px;">Total</th>
+                            <th style="font-size:10px;">NCF</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="grouped_data" t-as="group">
+                            <!-- Título del grupo -->
+                            <tr>
+                                <td colspan="7" style="background-color:#F0F0F0; font-weight:bold; font-size:11px;">
+                                    <t t-esc="group['tipo']"/>
+                                </td>
+                            </tr>
+                            <!-- Líneas del grupo -->
+                            <t t-foreach="group['lines']" t-as="line">
+                                <tr>
+                                    <td style="font-size:10px;"><t t-esc="line['numero_factura']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['fecha_factura']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['cliente']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['imp_nincluidos']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['impuesto']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['total']"/></td>
+                                    <td style="font-size:10px;"><t t-esc="line['numero_comprobante']"/></td>
+                                </tr>
+                            </t>
+                            <!-- Subtotal del grupo -->
+                            <tr>
+                                <td colspan="2"/>
+                                <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                    Subtotal:
+                                </td>
+                                <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                    <t t-esc="group['subtotal_ingreso_neto']"/>
+                                </td>
+                                <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                    <t t-esc="group['subtotal_itbis']"/>
+                                </td>
+                                <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                    <t t-esc="group['subtotal']"/>
+                                </td>
+                                <td/>
+                            </tr>
+                        </t>
+                        <tr>
+                            <td colspan="2"/>
+                            <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                TOTAL GENERAL
+                            </td>
+                            <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                <t t-esc="total_general_ingreso_neto"/>
+                            </td>
+                            <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                <t t-esc="total_general_itbis"/>
+                            </td>
+                            <td style="font-size:10px; font-weight:bold; background-color:#F9F9F9;">
+                                <t t-esc="total_general_total"/>
+                            </td>
+                            <td/>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+</odoo>

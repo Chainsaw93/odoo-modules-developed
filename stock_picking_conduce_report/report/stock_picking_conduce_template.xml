@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_conduce_document" name="Conduce Document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                
+                <div class="page">
+                    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                    <meta charset="UTF-8"/>
+                    <style>
+                        /* ==== CONFIGURACIÓN CRÍTICA PARA wkhtmltopdf 0.12.6.1 ==== */
+                        @charset "UTF-8";
+                        
+                        .page {
+                            font-family: "DejaVu Sans", Arial, sans-serif;
+                            font-size: 8px;
+                            line-height: 1.2;
+                        }
+                        
+                        @media print {
+                            @page {
+                                size: A4;
+                                margin: 20mm 15mm 25mm 15mm; /* top, right, bottom, left */
+                            }
+                            
+                            body { margin: 0; padding: 0; }
+                            
+                            .page {
+                                /* CRÍTICO: Añadir padding-bottom para dejar espacio al footer y el gap deseado */
+                                padding-bottom: 50mm; /* 30mm (altura del footer) + 20mm (aprox. 75px de espacio) */
+                            }
+
+                            /* CRÍTICO: Header repetido en cada página */
+                            .main-table thead {
+                                display: table-header-group !important;
+                            }
+                            
+                            .main-table tr {
+                                page-break-inside: avoid !important;
+                            }
+                            
+                            .footer {
+                                position: fixed;
+                                bottom: 0; /* ¡CRÍTICO! Fija el footer en la parte inferior de cada página */
+                                left: 0;
+                                right: 0;
+                                background-color: white; /* Evita que el contenido de la tabla se vea detrás */
+                                font-size: 10px;
+                            }
+                            .footer .signature-section {
+                                /* Usamos padding para respetar los márgenes laterales de la página */
+                                padding: 5mm 15mm 0 15mm; 
+                                border-top: 1px solid #000;
+                                height: auto; /* Allow content to dictate height */
+                                min-height: 25mm; /* Ensure enough space for signatures */
+                            }
+                            .main-table {
+                                width: 100%;
+                                border-collapse: separate;
+                                border-spacing: 0;
+                                table-layout: fixed;
+                                /* Quitar el margin-bottom grande de aquí, ya lo maneja el padding-bottom del .page */
+                                margin-bottom: 0; 
+                            }
+                            .main-table thead .page-header-cell { padding: 0; border: none; }
+                            .main-table thead .product-columns-header th { background-color: #f2f2f2 !important; border: 1px solid #ddd; padding: 8px 6px; font-size: 10px; text-align: center; font-weight: bold; white-space: nowrap; }
+                            .main-table tbody td { font-size: 9px; border: 1px solid #ddd; padding: 5px 4px; vertical-align: top; word-wrap: break-word; }
+
+                        }
+                        
+                        /* TABLA PRINCIPAL UNIFICADA */
+                        .main-table {
+                            width: 100%;
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                            /* Este margin-bottom es para la visualización en pantalla,
+                            el de @media print es el que afecta la impresión */
+                            margin-bottom: 30mm; 
+                        }
+
+                        /* Celda del encabezado principal (logo, info, etc.) */
+                        .main-table thead .page-header-cell {
+                            padding: 0;
+                            border: none;
+                        }
+                        
+                        /* Encabezados de las columnas de productos */
+                        .main-table thead .product-columns-header th {
+                            background-color: #f2f2f2 !important;
+                            border: 1px solid #ddd;
+                            padding: 8px 6px;
+                            font-size: 10px;
+                            text-align: center;
+                            font-weight: bold;
+                            white-space: nowrap;
+                        }
+
+                        /* Celdas del cuerpo de la tabla (filas de productos) */
+                        .main-table tbody td {
+                            font-size: 9px;
+                            border: 1px solid #ddd;
+                            padding: 5px 4px;
+                            vertical-align: top;
+                            word-wrap: break-word;
+                        }
+                        
+                        /* Anchos de columna (se aplican a th y td) */
+                        .col-cantidad { width: 6%; }
+                        .col-referencia { width: 8%; }
+                        .col-descripcion { width: 61%; }
+                        .col-notas { width: 25%; }
+
+                        /* Estilos del header-container (sin cambios) */
+                        .header-container { width: 100%; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #ddd; }
+                        .header-row { display: table; width: 100%; margin-bottom: 8px; }
+                        .header-left { display: table-cell; width: 50%; vertical-align: top; padding-right: 20px; text-align: left; }
+                        .header-right { display: table-cell; width: 50%; vertical-align: top; text-align: left; }
+                        .company-logo { max-width: 35%; height: auto; margin-bottom: 10px; }
+                        .company-info { font-size: 11px; line-height: 1.3; margin-bottom: 15px; }
+                        .company-name { font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+                        .delivery-info { font-size: 11px; line-height: 1.3; }
+                        .delivery-title { font-weight: bold; margin-bottom: 5px; }
+                        .phone-icon::before { content: "\260E"; margin-right: 5px; }
+                        .document-info { font-size: 11px; line-height: 1.4; }
+                        .document-title { font-weight: bold; font-size: 14px; text-transform: uppercase; margin-bottom: 8px; }
+                        .barcode-container { margin-top: 10px; text-align: left; }
+                        .bottom-info { width: 100%; border-top: 1px solid #ddd; padding-top: 6px; margin-top: 6px; font-size: 11px; }
+                        .bottom-info-row { display: table; width: 100%; }
+                        .bottom-info-cell { display: table-cell; width: 33.33%; padding-right: 15px; }
+                        .bottom-info-cell:last-child { padding-right: 0; }
+                        .info-label { font-weight: bold; }
+                        .serials-lots { font-style: italic; color: #666; font-size: 8px; margin-top: 3px; }
+                        .text-center { text-align: center; }
+                        
+                        /* Estilos del Footer */
+                    .signature-section { 
+                        display: flex; /* Use flexbox for horizontal alignment */
+                        margin-top: 10px; 
+                        justify-content: space-between; /* Pushes items to the far ends */
+                        align-items: flex-end; /* Aligns content to the bottom of the section */
+                        width: 100%; /* Ensure it spans the full width of its container */
+                    }
+                    .signature-cell { 
+                        /* IMPORTANT: Remove 'display: table-cell;' here. 
+                        When parent is 'flex', children are automatically flex items. */
+                        flex-basis: 45%; /* Gives each cell a base width for spacing */
+                        text-align: center; /* Center text within each cell by default */
+                        padding: 0 20px; /* Adjust horizontal padding as needed */
+                    }
+                    .signature-cell:first-child {
+                        text-align: left; /* Explicitly align the first cell's content to the left */
+                        margin-right: auto; /* Pushes this item to the far left in the flex container */
+                    }
+                    .signature-cell:last-child {
+                        text-align: right; /* Explicitly align the last cell's content to the right */
+                        margin-left: auto; /* Pushes this item to the far right in the flex container */
+                    }
+                    .signature-line { 
+                        border-bottom: 1px solid #000; /* Creates the line BELOW the text */
+                        margin: 5px 0; /* Space above and below the line */
+                        padding-bottom: 5px; /* Space between text and the line */
+                        font-weight: bold; 
+                        font-size: 9px;
+                        display: inline-block; /* Allows setting width and ensures line wraps content */
+                        min-width: 150px; /* Ensures the line is always visible and has a minimum length */
+                        text-align: center; /* Centers the text over the line */
+                        color: red;
+                    }
+                    </style>
+                    
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <td colspan="4" class="page-header-cell">
+                                    <div class="header-container">
+                                        <div class="header-row">
+                                            <div class="header-left">
+                                                <t t-if="o.company_id.logo"><img t-att-src="image_data_uri(o.company_id.logo)" class="company-logo" alt="Logo"/></t>
+                                                <div class="company-info"><div class="company-name" t-field="o.company_id.name"/> <div t-field="o.company_id.street"/> <t t-if="o.company_id.street2"><div t-field="o.company_id.street2"/></t> <div><span t-field="o.company_id.city"/><t t-if="o.company_id.state_id">, <span t-field="o.company_id.state_id.name"/></t><t t-if="o.company_id.zip"> <span t-field="o.company_id.zip"/></t></div> <t t-if="o.company_id.country_id"><div t-field="o.company_id.country_id.name"/></t></div>
+                                                <div class="delivery-info"><div class="delivery-title">Dirección de entrega:</div> <div><t t-if="o.partner_id"><div t-field="o.partner_id.street"/><t t-if="o.partner_id.street2"><div t-field="o.partner_id.street2"/></t><div><span t-field="o.partner_id.city"/><t t-if="o.partner_id.state_id">, <span t-field="o.partner_id.state_id.name"/></t><t t-if="o.partner_id.zip"> <span t-field="o.partner_id.zip"/></t></div><t t-if="o.partner_id.phone"><div><span class="phone-icon"></span> <span t-field="o.partner_id.phone"/></div></t></t></div></div>
+                                            </div>
+                                            <div class="header-right">
+                                                <div class="document-info">
+                                                    <div class="document-title">CONDUCE</div>
+                                                    <div><span class="info-label">Fecha: </span> <span t-field="o.date_done" t-options="{'widget': 'datetime'}"/></div>
+                                                    <div><span class="info-label">Hecho por: </span> <span t-field="o.responsable_validacion"/></div>
+                                                    <div class="barcode-container"><t t-if="o.name"><img t-att-src="o.get_barcode_image()" style="width: 250px; height: 75px;" alt="Código de barras"/></t></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="bottom-info"><div class="bottom-info-row"><div class="bottom-info-cell"><span class="info-label">Orden #: </span> <span t-field="o.orden_compra"/></div><div class="bottom-info-cell"><span class="info-label">Condición: </span> <span t-field="o.condicion"/></div><div class="bottom-info-cell"><span class="info-label">Vía: </span> <span t-field="o.via"/></div></div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="product-columns-header">
+                                <th class="col-cantidad"><strong>Cantidad</strong></th>
+                                <th class="col-referencia"><strong>Referencia</strong></th>
+                                <th class="col-descripcion"><strong>Descripción</strong></th>
+                                <th class="col-notas"><strong>Notas</strong></th>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            <t t-set="grouped_moves" t-value="o._get_grouped_moves_for_conduce()"/>
+                            <t t-foreach="grouped_moves" t-as="move_data">
+                                <tr>
+                                    <td class="text-center col-cantidad">
+                                        <span t-esc="'%.0f' % move_data['quantity'] if move_data['quantity'] == int(move_data['quantity']) else '%.2f' % move_data['quantity']"/>
+                                        <span t-field="move_data['product'].uom_id.name"/>
+                                    </td>
+                                    <td class="text-center col-referencia">
+                                        <span t-field="move_data['product'].default_code"/>
+                                    </td>
+                                    <td class="col-descripcion">
+                                        <strong t-field="move_data['product'].name"/>
+                                        <t t-if="move_data['serials'] or move_data['lots']">
+                                            <div class="serials-lots">[<t t-esc="', '.join(move_data['serials'] + move_data['lots'])"/>]</div>
+                                        </t>
+                                    </td>
+                                    <td class="col-notas">
+                                        <t t-if="move_data['line_notes']">
+                                            <span t-esc="str(move_data['line_notes'])" style="white-space: pre-line;"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        <div class="row signature-section">
+                            <div class="col-6">
+                                <div style="font-size: 8px; border-top: 1px solid #000; width: 200px; margin: 0 auto; padding-top: 3px;">Entregado por</div>
+                            </div>
+                            <div class="col-6 ">
+                                <div style="font-size: 8px; border-top: 1px solid #000; width: 200px; margin: 0 auto; padding-top: 3px;">Recibido por</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

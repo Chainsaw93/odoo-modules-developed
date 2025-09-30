@@ -1,0 +1,25 @@
+<odoo>
+  <record id="view_res_config_settings_gadint_commission_sale" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.gadint.commission.sale</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Insertar un bloque propio justo después del bloque 'Facturación' -->
+      <xpath expr="//app[@name='sale_management']/block[@name='invoicing_setting_container']" position="after">
+        <block title="Comisiones (Gadint)" name="gadint_commission_block">
+          <setting id="gadint_auto_assign_commission_setting"
+                   string="Auto-asignar Referrer/Plan"
+                   help="Si está activo, al elegir vendedores externos en el pedido se establece Referrer y Plan automáticamente.">
+            <field name="gadint_auto_assign_commission"/>
+          </setting>
+
+          <setting id="gadint_default_plan_setting"
+                   string="Plan de comisión por defecto"
+                   help="Se aplicará cuando el partner externo no tenga plan propio.">
+            <field name="gadint_default_commission_plan_id" options="{'no_create_edit': True}"/>
+          </setting>
+        </block>
+      </xpath>
+    </field>
+  </record>
+</odoo>

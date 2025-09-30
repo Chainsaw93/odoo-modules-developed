@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista de formulario extendida para stock.picking -->
+    <record id="view_picking_form_extended" model="ir.ui.view">
+        <field name="name">stock.picking.form.extended</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar los campos después del campo de origen -->
+            <xpath expr="//field[@name='location_id']" position="after">
+                <field name="condicion" required="1"/>
+                <field name="via" required="1"/>
+                <field name="orden_compra" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de lista extendida para stock.picking -->
+    <record id="view_picking_tree_extended" model="ir.ui.view">
+        <field name="name">stock.picking.tree.extended</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <!-- Agregar columnas en la vista de lista -->
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="condicion"/>
+                <field name="via"/>
+                <field name="orden_compra"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda extendida -->
+    <record id="view_picking_search_extended" model="ir.ui.view">
+        <field name="name">stock.picking.search.extended</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <!-- Agregar filtros de búsqueda -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="condicion"/>
+                <field name="via"/>
+                <field name="orden_compra"/>
+            </xpath>
+            
+            <!-- Agregar filtros en el panel lateral -->
+            <xpath expr="//filter[@name='late']" position="after">
+                <separator/>
+                <filter string="Consignación" name="consignacion" domain="[('condicion', '=', 'consignacion')]"/>
+                <filter string="PO" name="po" domain="[('condicion', '=', 'po')]"/>
+                <filter string="Proyecto" name="proyecto" domain="[('condicion', '=', 'proyecto')]"/>
+                <separator/>
+                <filter string="FedEx" name="fedex" domain="[('via', '=', 'fedex')]"/>
+                <filter string="Local" name="local" domain="[('via', '=', 'local')]"/>
+                <filter string="Vendedor" name="vendedor" domain="[('via', '=', 'vendedor')]"/>
+            </xpath>
+            
+            <!-- Agregar agrupación -->
+            <xpath expr="//group" position="inside">
+                <filter string="Condición" name="group_condicion" context="{'group_by': 'condicion'}"/>
+                <filter string="Vía" name="group_via" context="{'group_by': 'via'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

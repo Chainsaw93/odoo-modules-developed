@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista del Wizard -->
+    <record id="commission_report_wizard_form" model="ir.ui.view">
+        <field name="name">commission.report.wizard.form</field>
+        <field name="model">commission.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Comisiones">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="company_ids" widget="many2many_tags" placeholder="Seleccionar Sucursales..." invisible="1"/>
+                            Reporte de Comisiones
+                        </h1>
+                        <p>Configure los filtros y opciones para generar el reporte de ventas con cálculo de comisiones</p>
+                    </div>
+                    
+                    <group>
+                        <group string="Rango de Fechas" col="2">
+                            <field name="date_from" required="1"/>
+                            <field name="date_to" required="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Filtros" name="filters">
+                            <group>
+                                <group string="Filtros de Ventas">
+                                    <field name="salesperson_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar vendedores..."/>
+                                    <field name="partner_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar clientes..."/>
+                                    <!-- CAMBIO: Campo corregido para facturas -->
+                                    <field name="invoice_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar facturas..."
+                                           context="{'search_default_posted': 1}"/>
+                                </group>
+                                
+                                <group string="Filtros de Productos">
+                                    <field name="category_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar categorías..."/>
+                                    <field name="product_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar productos..."/>
+                                </group>
+                            </group>
+                            
+                            <group>
+                                <group string="Filtros de Ubicación">
+                                    <field name="company_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar sucursales..."/>
+                                    <field name="warehouse_ids" widget="many2many_tags" 
+                                           placeholder="Seleccionar almacenes..."/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Agrupación" name="grouping">
+                            <group string="Opciones de Agrupación">
+                                <group>
+                                    <field name="group_by_salesperson"/>
+                                    <field name="group_by_customer"/>
+                                    <field name="group_by_category"/>
+                                </group>
+                                <group>
+                                    <field name="group_by_product"/>
+                                    <field name="group_by_company"/>
+                                    <field name="group_by_warehouse"/>
+                                </group>
+                            </group>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <p><strong>Nota:</strong> La agrupación organizará los datos del reporte según los criterios seleccionados. 
+                                   Puede seleccionar múltiples opciones de agrupación.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="Generar Reporte PDF" name="generate_report" 
+                            type="object" class="btn-primary"/>
+                    <button string="Generar Excel" name="generate_excel_report" 
+                            type="object" class="btn-secondary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción para abrir el wizard -->
+    <record id="commission_report_wizard_action" model="ir.actions.act_window">
+        <field name="name">Reporte de Comisiones</field>
+        <field name="res_model">commission.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="commission_report_wizard_form"/>
+    </record>
+
+    <!-- Menú en Contabilidad > Reportes -->
+    <menuitem id="commission_report_menu_accounting" 
+              name="Reporte de Comisiones"
+              parent="account.menu_finance_reports"
+              action="commission_report_wizard_action"
+              sequence="5"/>
+</odoo>

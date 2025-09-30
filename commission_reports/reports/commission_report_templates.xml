@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Formato de papel A4 horizontal -->
+    <record id="commission_report_paperformat" model="report.paperformat">
+        <field name="name">Comisiones A4 Horizontal</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line">false</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Acción del reporte -->
+    <record id="commission_report_action" model="ir.actions.report">
+        <field name="name">Reporte de Comisiones</field>
+        <field name="model">commission.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commission_reports.commission_report_template</field>
+        <field name="report_file">commission_reports.commission_report_template</field>
+        <field name="print_report_name">'Reporte_Comisiones_%s_%s' % (object.date_from, object.date_to)</field>
+        <field name="paperformat_id" ref="commission_report_paperformat"/>
+    </record>
+
+    <!-- Acción del reporte Excel -->
+    <record id="commission_excel_report_action" model="ir.actions.report">
+        <field name="name">Reporte de Comisiones Excel</field>
+        <field name="model">commission.report.wizard</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">commission_reports.commission_excel_report</field>
+        <field name="report_file">commission_reports.commission_excel_report</field>
+        <field name="print_report_name">'Reporte_Comisiones_%s_%s' % (object.date_from, object.date_to)</field>
+    </record>
+
+    <!-- Template QWeb principal -->
+    <template id="commission_report_template">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-family: Arial; font-size: 9px;">
+                    
+                    <!-- Encabezado del reporte -->
+                    <div class="text-center mb-3" style="margin-top: 30px;">
+                        <h2 style="margin-bottom: 5px; font-size: 16px; font-weight: bold;">
+                            <t t-esc="company_name"/>
+                        </h2>
+                        <h3 style="margin-bottom: 5px; font-size: 14px; font-weight: bold;">
+                            REPORTE DE COMISIONES
+                        </h3>
+                        <p style="margin-bottom: 10px; font-size: 10px;">
+                            Período: Del <t t-esc="date_from"/> hasta <t t-esc="date_to"/>
+                        </p>
+                        <t t-if="filters">
+                            <p style="margin-bottom: 15px; font-size: 8px; color: #666;">
+                                Filtros aplicados: <t t-esc="filters"/>
+                            </p>
+                        </t>
+                    </div>
+
+                    <!-- Tabla del reporte -->
+                    <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; border: 1px solid #000;">
+                        <thead>
+                            <tr style="background-color: #D7E4BC; font-weight: bold; font-size: 8px;">
+                                <th style="width: 11%; text-align: center; padding: 3px; border: 1px solid #000;">Cliente</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Fecha</th>
+                                <th style="width: 7%; text-align: center; padding: 3px; border: 1px solid #000;">Factura</th>
+                                <th style="width: 8%; text-align: center; padding: 3px; border: 1px solid #000;">Número de Comprobante</th>
+                                <th style="width: 9%; text-align: center; padding: 3px; border: 1px solid #000;">Categoría</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Código</th>
+                                <th style="width: 16%; text-align: center; padding: 3px; border: 1px solid #000;">Descripción</th>
+                                <th style="width: 4%; text-align: center; padding: 3px; border: 1px solid #000;">Moneda</th>
+                                <th style="width: 4%; text-align: center; padding: 3px; border: 1px solid #000;">Unidad</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Cantidad</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Costo</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Costo Total</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">Precio</th>
+                                <th style="width: 6%; text-align: center; padding: 3px; border: 1px solid #000;">Total Neto</th>
+                                <th style="width: 6%; text-align: center; padding: 3px; border: 1px solid #000;">Beneficio</th>
+                                <th style="width: 5%; text-align: center; padding: 3px; border: 1px solid #000;">% Margen Neto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Contenido con agrupación -->
+                            <t t-if="has_grouping">
+                                <t t-foreach="grouped_lines.items()" t-as="group_item">
+                                    <t t-set="group_name" t-value="group_item[0]"/>
+                                    <t t-set="group_data" t-value="group_item[1]"/>
+                                    
+                                    <!-- Encabezado del grupo -->
+                                    <tr style="background-color: #E8F4F8; font-weight: bold;">
+                                        <td colspan="16" style="padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                            <t t-esc="group_name"/>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Líneas del grupo -->
+                                    <t t-call="commission_reports.commission_report_lines">
+                                        <t t-set="report_lines" t-value="group_data['lines']"/>
+                                    </t>
+                                    
+                                    <!-- Subtotal del grupo -->
+                                    <tr style="background-color: #F5F5F5; font-weight: bold; font-style: italic;">
+                                        <td colspan="9" style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            Subtotal:
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            <t t-esc="'{:,.2f}'.format(group_data['subtotals']['total_quantity'])"/>
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            -
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            <t t-esc="'{:,.2f}'.format(group_data['subtotals']['total_cost'])"/>
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            -
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            <t t-esc="'{:,.2f}'.format(group_data['subtotals']['total_net'])"/>
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            <t t-esc="'{:,.2f}'.format(group_data['subtotals']['total_benefit'])"/>
+                                        </td>
+                                        <td style="text-align: right; padding: 3px; border: 1px solid #000; font-size: 8px;">
+                                            <t t-esc="'{:.0f}%'.format(group_data['subtotals']['avg_margin_percentage'])"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                            
+                            <!-- Contenido sin agrupación -->
+                            <t t-if="not has_grouping">
+                                <t t-call="commission_reports.commission_report_lines">
+                                    <t t-set="report_lines" t-value="lines"/>
+                                </t>
+                            </t>
+                        </tbody>
+                        
+                        <!-- Totales generales -->
+                        <tfoot>
+                            <tr style="background-color: #D7E4BC; font-weight: bold;">
+                                <td colspan="9" style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    TOTALES:
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    <t t-esc="'{:,.2f}'.format(totals['total_quantity'])"/>
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    -
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    <t t-esc="'{:,.2f}'.format(totals['total_cost'])"/>
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    -
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    <t t-esc="'{:,.2f}'.format(totals['total_net'])"/>
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    <t t-esc="'{:,.2f}'.format(totals['total_benefit'])"/>
+                                </td>
+                                <td style="text-align: right; padding: 5px; border: 1px solid #000; font-size: 9px;">
+                                    <t t-esc="'{:.0f}%'.format(totals['avg_margin_percentage'])"/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <!-- Información adicional -->
+                    <div style="margin-top: 20px; font-size: 8px; color: #666;">
+                        <p>Reporte generado el <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/> por <t t-esc="user.name"/></p>
+                        <p>Total de líneas: <t t-esc="totals['line_count']"/></p>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Sub-template para las líneas del reporte -->
+    <template id="commission_report_lines">
+        <t t-foreach="report_lines" t-as="line">
+            <tr style="font-size: 7px;">
+                <td style="padding: 2px; border: 1px solid #000; word-wrap: break-word;">
+                    <t t-esc="line['customer']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['date']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['invoice']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['fiscal_receipt_number']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000;">
+                    <t t-esc="line['category']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['code']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; word-wrap: break-word;">
+                    <t t-esc="line['description']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['currency']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: center;">
+                    <t t-esc="line['uom']"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['quantity'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['cost'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['total_cost'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['price'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['total_net'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:,.2f}'.format(line['benefit'])"/>
+                </td>
+                <td style="padding: 2px; border: 1px solid #000; text-align: right;">
+                    <t t-esc="'{:.0f}%'.format(line['margin_percentage'])"/>
+                </td>
+            </tr>
+        </t>
+    </template>
+</odoo>

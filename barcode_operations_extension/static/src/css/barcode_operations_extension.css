@@ -1,0 +1,300 @@
+/* Barcode Operations Extension Styles */
+
+/* Header Information Styles */
+.o_barcode_picking_info_extended {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.o_barcode_info_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.o_barcode_info_row:last-child {
+    margin-bottom: 0;
+}
+
+.o_barcode_info_label {
+    font-weight: 600;
+    color: #495057;
+    min-width: 120px;
+    margin-right: 10px;
+}
+
+.o_barcode_info_value {
+    color: #212529;
+    background-color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #ced4da;
+    flex: 1;
+}
+
+/* Kanban View Styles */
+.o_kanban_record_details {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid #e9ecef;
+}
+
+.o_kanban_record_detail {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3px;
+    font-size: 12px;
+}
+
+.o_kanban_detail_label {
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 60px;
+    margin-right: 8px;
+}
+
+/* Custom Barcode Operation Card Styles */
+.o_barcode_operation_card {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    padding: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.o_barcode_operation_card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.o_barcode_operation_details {
+    margin: 8px 0;
+    padding: 6px 0;
+}
+
+.o_barcode_detail_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.o_barcode_detail_row:last-child {
+    margin-bottom: 0;
+}
+
+.o_barcode_detail_label {
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 70px;
+    margin-right: 8px;
+    font-size: 11px;
+}
+
+.o_barcode_detail_value {
+    color: #495057;
+    font-family: monospace;
+    font-size: 11px;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 2px;
+    border: 1px solid #e9ecef;
+}
+
+/* Form View Header Styles */
+.o_barcode_operations_header {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+.o_barcode_info_container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.o_barcode_info_field {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.o_barcode_info_field .o_form_label {
+    font-weight: 600;
+    color: #495057;
+    margin-right: 8px;
+    min-width: 80px;
+}
+
+.o_barcode_info_content {
+    color: #212529;
+    font-family: monospace;
+    background-color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    border: 1px solid #ced4da;
+    font-size: 12px;
+}
+
+/* Operations Dashboard Styles */
+.o_barcode_operations_extended {
+    margin-bottom: 15px;
+}
+
+.o_barcode_operation_header {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.o_barcode_operation_title {
+    margin-bottom: 8px;
+}
+
+.o_barcode_operation_title h4 {
+    margin: 0;
+    color: #212529;
+    font-size: 16px;
+}
+
+.o_barcode_operation_info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.o_barcode_info_item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.o_barcode_info_item .o_barcode_info_label {
+    font-weight: 600;
+    color: #495057;
+    margin-right: 6px;
+}
+
+.o_barcode_info_item .o_barcode_info_value {
+    color: #212529;
+    font-family: monospace;
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+/* Barcode App Kanban Specific Styles */
+.o_barcode_operations_kanban .o_kanban_record {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.o_barcode_operations_kanban .o_kanban_record:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+/* State Badge Enhancement */
+.o_kanban_record_state .badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .o_barcode_info_row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .o_barcode_info_label {
+        min-width: auto;
+        margin-right: 0;
+        margin-bottom: 2px;
+    }
+    
+    .o_barcode_operation_info {
+        gap: 6px;
+    }
+    
+    .o_barcode_info_item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .o_barcode_info_item .o_barcode_info_label {
+        margin-right: 0;
+        margin-bottom: 2px;
+    }
+    
+    .o_barcode_info_container {
+        gap: 6px;
+    }
+    
+    .o_barcode_info_field {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .o_barcode_info_field .o_form_label {
+        margin-right: 0;
+        margin-bottom: 4px;
+        min-width: auto;
+    }
+}
+
+/* Small screen adjustments */
+@media (max-width: 480px) {
+    .o_barcode_operation_card {
+        padding: 8px;
+        margin-bottom: 6px;
+    }
+    
+    .o_barcode_extended_info .o_barcode_info_label {
+        min-width: 60px;
+        font-size: 10px;
+    }
+    
+    .o_barcode_extended_info .o_barcode_info_value {
+        font-size: 10px;
+    }
+}
+
+/* Accessibility Enhancements */
+.o_barcode_info_value:focus,
+.o_barcode_line_info_value:focus,
+.o_barcode_info_content:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .o_barcode_picking_info_extended,
+    .o_barcode_operations_header {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .o_barcode_operation_card {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}

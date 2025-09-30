@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menú principal para vendedores externos en ventas -->
+    <menuitem id="menu_sale_external_salesperson"
+              name="Vendedores Externos"
+              parent="sale.sale_menu_root"
+              sequence="15"
+              groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+
+    <!-- Submenú para gestión de vendedores externos -->
+    <menuitem id="menu_external_salesperson_management"
+              name="Vendedores Externos"
+              parent="menu_sale_external_salesperson"
+              action="action_external_salesperson"
+              sequence="10"/>
+
+    <!-- Submenú para contactos marcados como vendedores externos -->
+    <menuitem id="menu_external_salesperson_contacts"
+              name="Contactos Vendedores Externos"
+              parent="menu_sale_external_salesperson"
+              action="action_partner_external_sales_team"
+              sequence="20"/>
+
+    <!-- Menús para reportes y análisis de comisiones -->
+    <menuitem id="menu_sale_commission_external"
+              name="Comisiones"
+              parent="menu_sale_external_salesperson"
+              sequence="30"
+              groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
+
+    <!-- Submenú para órdenes con vendedores externos -->
+    <menuitem id="menu_sale_order_external_salesperson"
+              name="Órdenes con Vendedores Externos"
+              parent="menu_sale_commission_external"
+              action="action_sale_order_external_salesperson"
+              sequence="10"/>
+
+    <!-- Submenú para facturas con vendedores externos -->
+    <menuitem id="menu_invoice_external_salesperson"
+              name="Facturas con Vendedores Externos"
+              parent="menu_sale_commission_external"
+              action="action_invoice_external_salesperson"
+              sequence="20"/>
+
+    <!-- Submenú para comisiones pendientes -->
+    <menuitem id="menu_invoice_commission_pending"
+              name="Comisiones Pendientes"
+              parent="menu_sale_commission_external"
+              action="action_invoice_commission_pending"
+              sequence="30"/>
+
+    <!-- Submenú para achievements de comisiones -->
+    <menuitem id="menu_commission_achievements_external"
+              name="Comisiones Calculadas"
+              parent="menu_sale_commission_external"
+              action="action_commission_achievement_amount_collected"
+              sequence="40"/>
+
+    <!-- Submenú para reporte de comisiones -->
+    <menuitem id="menu_commission_report_external"
+              name="Reporte de Comisiones"
+              parent="menu_sale_commission_external"
+              action="action_sale_commission_report_gadint"
+              sequence="50"/>
+
+  <record id="action_gadint_external_commission_report" model="ir.actions.act_window">
+    <field name="name">Comisiones Vendedores Externos</field>
+    <field name="res_model">account.move</field>
+    <field name="view_mode">pivot,graph,list</field>
+    <field name="domain">[('move_type','=','out_invoice'), ('external_salesperson_ids','!=', False)]</field>
+    <field name="context">{'search_default_group_by_external': 1}</field>
+  </record>
+
+  <menuitem id="menu_gadint_commission_report_root"
+            name="Comisiones (Externos)"
+            parent="sale.menu_sale_report"
+            sequence="90"
+            action="action_gadint_external_commission_report"/>
+
+  <!-- Menú directo para acceso rápido a achievements -->
+  <menuitem id="menu_commission_achievements_quick_access"
+            name="Comisiones Calculadas"
+            parent="sale.menu_sale_report"
+            sequence="91"
+            action="action_commission_achievement_amount_collected"/>
+
+</odoo>

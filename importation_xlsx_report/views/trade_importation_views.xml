@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Heredamos la vista de importation_reports para agregar el botón -->
+    <record id="view_importation_form_inherit_xlsx" model="ir.ui.view">
+        <field name="name">trade.importation.form.inherit.xlsx</field>
+        <field name="model">trade.importation</field>
+        <field name="inherit_id" ref="importation_reports.view_importation_form_inheritReport"/>
+        <field name="arch" type="xml">
+            <!-- Insertamos dentro del header -->
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_generate_excel_report"
+                    string="Informe resumido de importación"
+                    type="object"
+                    invisible="state != 'done'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

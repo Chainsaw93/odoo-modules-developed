@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add XIII Configuration to Payroll Settings -->
+    <record id="res_config_settings_view_form_xiii" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.xiii.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="50"/>
+        <field name="inherit_id" ref="hr_payroll.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='hr_payroll_settings']" position="after">
+                <!-- XIII Salary Configuration Block -->
+                <block title="XIII Salary Configuration" id="hr_xiii_settings">
+                    <setting string="XIII Period Configuration" help="Configure the XIII salary calculation and payment dates">
+                        <div class="content-group mt16">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <label for="xiii_init_date" class="o_form_label">Start Date</label>
+                                    <field name="xiii_init_date" 
+                                           widget="date"
+                                           help="Start date for XIII salary calculation period"/>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label for="xiii_end_date" class="o_form_label">End Date</label>
+                                    <field name="xiii_end_date" 
+                                           widget="date"
+                                           help="End date for XIII salary calculation period"/>
+                                </div>
+                                <div class="col-lg-4">
+                                    <label for="xiii_pay_date" class="o_form_label">Payment Date</label>
+                                    <field name="xiii_pay_date" 
+                                           widget="date"
+                                           help="Date when XIII salary should be paid"/>
+                                </div>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

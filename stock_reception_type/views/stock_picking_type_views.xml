@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Hereda la vista del formulario de tipos de operaciones -->
+    <record id="view_picking_type_form_inherit_reception_type" model="ir.ui.view">
+        <field name="name">stock.picking.type.form.inherit.reception.type</field>
+        <field name="model">stock.picking.type</field>
+        <field name="inherit_id" ref="stock.view_picking_type_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="is_reception_type" invisible="1"/>
+                <field name="reception_operation_type" 
+                       invisible="not is_reception_type" 
+                       placeholder="Seleccione el tipo de operación de recepción..."/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

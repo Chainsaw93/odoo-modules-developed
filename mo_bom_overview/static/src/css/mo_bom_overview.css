@@ -1,0 +1,431 @@
+/* ===== MO BOM OVERVIEW RESPONSIVE STYLES ===== */
+
+/* Contenedor principal responsive */
+.o_mrp_bom_report_page {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 1rem;
+}
+
+/* Tabla responsive */
+.o_mrp_bom_expandable {
+    width: 100%;
+    table-layout: auto;
+    word-wrap: break-word;
+    font-size: 0.875rem; /* Tamaño de fuente ligeramente menor */
+}
+
+/* Wrapper para scroll horizontal en pantallas pequeñas */
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Optimización de columnas */
+.o_mrp_bom_expandable th,
+.o_mrp_bom_expandable td {
+    padding: 0.5rem 0.3rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Columna de producto - más flexible */
+.o_mrp_bom_expandable th:first-child,
+.o_mrp_bom_expandable td:first-child {
+    min-width: 200px;
+    max-width: 400px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* Columnas numéricas - ancho fijo optimizado */
+.o_mrp_bom_expandable th.text-end,
+.o_mrp_bom_expandable td.text-end {
+    min-width: 80px;
+    max-width: 120px;
+}
+
+/* Columna UoM - ancho reducido */
+.o_mrp_bom_expandable th:nth-child(3),
+.o_mrp_bom_expandable td:nth-child(3) {
+    min-width: 60px;
+    max-width: 80px;
+}
+
+/* Alertas responsive */
+.alert {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Cards responsive */
+.card {
+    margin-bottom: 1rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Sección de totales responsive */
+.totals-section {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.totals-section table {
+    min-width: 300px;
+}
+
+/* Detalles de landed costs responsive */
+.landed-costs-details .col-md-6.col-lg-4 {
+    margin-bottom: 1rem;
+}
+
+.landed-costs-details .border.rounded.p-2 {
+    padding: 0.75rem !important;
+    word-wrap: break-word;
+}
+
+/* ===== MEDIA QUERIES PARA DIFERENTES RESOLUCIONES ===== */
+
+/* Tablets y pantallas medianas (768px - 1024px) */
+@media (max-width: 1024px) {
+    .o_mrp_bom_report_page {
+        padding: 0.75rem;
+    }
+    
+    .o_mrp_bom_expandable {
+        font-size: 0.8rem;
+    }
+    
+    .o_mrp_bom_expandable th,
+    .o_mrp_bom_expandable td {
+        padding: 0.4rem 0.2rem;
+    }
+    
+    /* Ocultar columnas menos importantes en tablets */
+    .o_mrp_bom_expandable th:nth-child(3),
+    .o_mrp_bom_expandable td:nth-child(3) {
+        display: none;
+    }
+    
+    /* Ajustar ancho de columnas */
+    .o_mrp_bom_expandable th:first-child,
+    .o_mrp_bom_expandable td:first-child {
+        min-width: 150px;
+        max-width: 250px;
+    }
+    
+    .row .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Móviles y pantallas pequeñas (hasta 768px) */
+@media (max-width: 768px) {
+    .o_mrp_bom_report_page {
+        padding: 0.5rem;
+    }
+    
+    /* Forzar scroll horizontal para la tabla */
+    .table-responsive-custom {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .o_mrp_bom_expandable {
+        min-width: 600px; /* Ancho mínimo para mantener legibilidad */
+        font-size: 0.75rem;
+    }
+    
+    /* Columnas más compactas */
+    .o_mrp_bom_expandable th,
+    .o_mrp_bom_expandable td {
+        padding: 0.3rem 0.2rem;
+    }
+    
+    /* Títulos más pequeños */
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.2rem;
+    }
+    
+    h6 {
+        font-size: 0.9rem;
+    }
+    
+    /* Alertas más compactas */
+    .alert {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert .row .col-8,
+    .alert .row .col-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+    
+    /* Cards stack verticalmente */
+    .landed-costs-details .col-md-6.col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    /* Botones más pequeños */
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Pantallas muy pequeñas (hasta 480px) */
+@media (max-width: 480px) {
+    .o_mrp_bom_report_page {
+        padding: 0.25rem;
+    }
+    
+    .o_mrp_bom_expandable {
+        min-width: 500px;
+        font-size: 0.7rem;
+    }
+    
+    .o_mrp_bom_expandable th,
+    .o_mrp_bom_expandable td {
+        padding: 0.2rem 0.1rem;
+    }
+    
+    /* Ocultar columnas adicionales en móviles muy pequeños */
+    .o_mrp_bom_expandable th:nth-child(4),
+    .o_mrp_bom_expandable td:nth-child(4) {
+        display: none;
+    }
+    
+    h1 {
+        font-size: 1.2rem;
+    }
+    
+    h3 {
+        font-size: 1rem;
+    }
+}
+
+/* ===== ESTILOS PARA COMPONENTES ESPECÍFICOS ===== */
+
+/* Indicadores de landed costs */
+.badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+/* Iconos responsive */
+.fa {
+    font-size: 0.9rem;
+}
+
+/* Números y monedas */
+.monetary-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+/* Márgenes adaptativos */
+.mt-4 {
+    margin-top: 1rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem !important;
+}
+
+/* ===== UTILIDADES RESPONSIVE ===== */
+
+/* Ocultar elementos en pantallas pequeñas */
+@media (max-width: 768px) {
+    .d-sm-none {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-xs-none {
+        display: none !important;
+    }
+}
+
+/* Mostrar solo en pantallas pequeñas */
+.d-sm-block {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .d-sm-block {
+        display: block !important;
+    }
+}
+
+/* ===== OPTIMIZACIONES DE PERFORMANCE ===== */
+
+/* Mejoras de rendering */
+.o_mrp_bom_expandable {
+    contain: layout style;
+}
+
+/* Scroll suave */
+.table-responsive-custom {
+    scroll-behavior: smooth;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .o_mrp_bom_report_page {
+        padding: 0;
+        overflow: visible;
+    }
+    
+    .table-responsive-custom {
+        overflow: visible;
+    }
+    
+    .o_mrp_bom_expandable {
+        min-width: auto;
+        font-size: 0.75rem;
+    }
+    
+    .alert {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ===== INDICADOR DE ESTADO ESTIMADO - RESPONSIVE ===== */
+.o_status_badge {
+    position: absolute;
+    /* Usar viewport units para que escale con la resolución */
+    top: -5vh;
+    right: -3vw;
+    /* Ancho dinámico basado en viewport width */
+    width: clamp(140px, 13.5vw, 185px);
+    
+    background: linear-gradient(45deg, #ff9800, #f57c00);
+    color: white;
+    padding: 0.6rem 0;
+    font-weight: bold;
+    /* Tamaño de fuente dinámico */
+    font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transform: rotate(45deg);
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+    
+    /* Asegurar que el contenido no se desborde */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Versión para modo oscuro */
+.o_dark .o_status_badge {
+    background: linear-gradient(45deg, #ff9800, #f57c00);
+    box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+}
+
+/* Contenedor relativo para posicionar el badge */
+.o_status_container {
+    position: relative;
+    overflow: visible !important;
+    /* Padding dinámico para evitar cortes */
+    padding-top: clamp(1.5rem, 4vh, 3rem);
+    padding-right: clamp(1rem, 3vw, 2rem);
+}
+
+/* ===== MEDIA QUERIES PARA DIFERENTES RESOLUCIONES ===== */
+
+/* Pantallas muy grandes (1920px+) */
+@media (min-width: 1920px) {
+    .o_status_badge {
+        top: -4vh;
+        right: -2.5vw;
+        width: clamp(180px, 12vw, 200px);
+        font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+    }
+}
+
+/* Pantallas grandes (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+    .o_status_badge {
+        top: -4.5vh;
+        right: -2.8vw;
+        width: clamp(160px, 12.5vw, 185px);
+        font-size: clamp(0.75rem, 1.15vw, 0.85rem);
+    }
+}
+
+/* Pantallas estándar como la tuya (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .o_status_badge {
+        top: -5vh;
+        right: -3vw;
+        width: clamp(140px, 13.5vw, 185px);
+        font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+    }
+}
+
+/* Tablets horizontal (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .o_status_badge {
+        top: -4vh;
+        right: -4vw;
+        width: clamp(120px, 15vw, 160px);
+        font-size: clamp(0.65rem, 1.4vw, 0.75rem);
+        padding: 0.5rem 0;
+    }
+    
+    .o_status_container {
+        padding-top: clamp(1.2rem, 3vh, 2.5rem);
+        padding-right: clamp(0.8rem, 4vw, 1.5rem);
+    }
+}
+
+/* Tablets vertical y móviles grandes (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    .o_status_badge {
+        top: -3vh;
+        right: -5vw;
+        width: clamp(100px, 18vw, 130px);
+        font-size: clamp(0.6rem, 1.6vw, 0.7rem);
+        padding: 0.4rem 0;
+    }
+    
+    .o_status_container {
+        padding-top: clamp(1rem, 2.5vh, 2rem);
+        padding-right: clamp(0.5rem, 5vw, 1.2rem);
+    }
+}
+
+/* Móviles pequeños (hasta 479px) */
+@media (max-width: 479px) {
+    .o_status_badge {
+        top: -2.5vh;
+        right: -6vw;
+        width: clamp(80px, 20vw, 110px);
+        font-size: clamp(0.5rem, 1.8vw, 0.65rem);
+        padding: 0.3rem 0;
+        letter-spacing: 0.5px;
+    }
+    
+    .o_status_container {
+        padding-top: clamp(0.8rem, 2vh, 1.5rem);
+        padding-right: clamp(0.3rem, 6vw, 1rem);
+    }
+}

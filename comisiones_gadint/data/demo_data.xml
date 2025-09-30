@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+        DATOS DEMO OPCIONALES
+        Descomente estos registros para crear datos de prueba automáticamente
+        Solo para entornos de desarrollo/testing
+    -->
+    <data noupdate="1">
+        
+        <!-- Contactos demo marcados como vendedores externos -->
+        <!-- 
+        <record id="demo_partner_external_leader" model="res.partner">
+            <field name="name">Maria González - Líder Regional</field>
+            <field name="email">maria.gonzalez@external.com</field>
+            <field name="phone">+1-555-0101</field>
+            <field name="external_sales_team">True</field>
+            <field name="is_company">False</field>
+            <field name="customer_rank">1</field>
+            <field name="category_id" eval="[(6, 0, [ref('base.res_partner_category_0')])]"/>
+        </record>
+
+        <record id="demo_partner_external_salesperson_1" model="res.partner">
+            <field name="name">Carlos Rodríguez - Vendedor</field>
+            <field name="email">carlos.rodriguez@external.com</field>
+            <field name="phone">+1-555-0102</field>
+            <field name="external_sales_team">True</field>
+            <field name="is_company">False</field>
+            <field name="customer_rank">1</field>
+        </record>
+
+        <record id="demo_partner_external_salesperson_2" model="res.partner">
+            <field name="name">Ana Martínez - Vendedora</field>
+            <field name="email">ana.martinez@external.com</field>
+            <field name="phone">+1-555-0103</field>
+            <field name="external_sales_team">True</field>
+            <field name="is_company">False</field>
+            <field name="customer_rank">1</field>
+        </record>
+        -->
+
+        <!-- Vendedores externos demo -->
+        <!--
+        <record id="demo_external_salesperson_leader" model="gadint.external.salesperson">
+            <field name="name">María González - Líder Regional</field>
+            <field name="seller_type">leader</field>
+            <field name="leader_percentage">2.0</field>
+            <field name="partner_id" ref="demo_partner_external_leader"/>
+        </record>
+
+        <record id="demo_external_salesperson_1" model="gadint.external.salesperson">
+            <field name="name">Carlos Rodríguez</field>
+            <field name="seller_type">salesperson</field>
+            <field name="leader_percentage">0.0</field>
+            <field name="partner_id" ref="demo_partner_external_salesperson_1"/>
+        </record>
+
+        <record id="demo_external_salesperson_2" model="gadint.external.salesperson">
+            <field name="name">Ana Martínez</field>
+            <field name="seller_type">salesperson</field>
+            <field name="leader_percentage">0.0</field>
+            <field name="partner_id" ref="demo_partner_external_salesperson_2"/>
+        </record>
+        -->
+
+        <!-- Plan de comisión demo para vendedores externos -->
+        <!--
+        <record id="demo_commission_plan_external" model="commission.plan">
+            <field name="name">Plan Demo - Vendedores Externos</field>
+            <field name="based_on">achievements</field>
+            <field name="per">external_salesperson</field>
+            <field name="effective_date_start" eval="(DateTime.today() - timedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="effective_date_end" eval="(DateTime.today() + timedelta(days=365)).strftime('%Y-%m-%d')"/>
+            <field name="target_frequency">monthly</field>
+            <field name="state">approved</field>
+        </record>
+        -->
+
+        <!-- Logros demo para el plan de comisión -->
+        <!--
+        <record id="demo_commission_achievement_invoiced" model="commission.achievement">
+            <field name="plan_id" ref="demo_commission_plan_external"/>
+            <field name="type">amount_invoiced</field>
+            <field name="rate">5.0</field>
+        </record>
+
+        <record id="demo_commission_achievement_collected" model="commission.achievement">
+            <field name="plan_id" ref="demo_commission_plan_external"/>
+            <field name="type">amount_collected</field>
+            <field name="rate">3.0</field>
+        </record>
+        -->
+
+        <!-- Cliente demo para pruebas -->
+        <!--
+        <record id="demo_customer_for_testing" model="res.partner">
+            <field name="name">Cliente Demo - Pruebas Comisiones</field>
+            <field name="email">cliente.demo@test.com</field>
+            <field name="phone">+1-555-9999</field>
+            <field name="is_company">True</field>
+            <field name="customer_rank">1</field>
+        </record>
+        -->
+
+        <!-- Producto demo para pruebas -->
+        <!--
+        <record id="demo_product_for_commission" model="product.product">
+            <field name="name">Producto Demo - Comisiones</field>
+            <field name="type">consu</field>
+            <field name="list_price">1000.00</field>
+            <field name="standard_price">600.00</field>
+            <field name="categ_id" ref="product.product_category_all"/>
+        </record>
+        -->
+
+        <!-- Configuraciones adicionales para demo -->
+        
+        <!-- Email template personalizado para vendedores externos -->
+        <record id="email_template_external_salesperson_assigned" model="mail.template">
+            <field name="name">Vendedor Externo Asignado</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Nuevo pedido asignado - ${object.name}</field>
+            <field name="email_from">${(object.company_id.email or user.email)|safe}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Estimado vendedor externo,</p>
+                    <p>Se le ha asignado un nuevo pedido de venta:</p>
+                    
+                    <table style="border-collapse: collapse; width: 100%;">
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;"><strong>Pedido:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;"><strong>Cliente:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.partner_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;"><strong>Fecha:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.date_order}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;"><strong>Total:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.amount_total} ${object.currency_id.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;"><strong>Vendedores Externos:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.external_salesperson_names}</td>
+                        </tr>
+                    </table>
+                    
+                    <p>Este pedido generará comisiones según el plan configurado.</p>
+                    
+                    <p>Saludos cordiales,<br/>
+                    ${user.name}<br/>
+                    ${object.company_id.name}</p>
+                </div>
+            </field>
+            <field name="auto_delete">False</field>
+        </record>
+
+        <!-- Regla de automatización para notificar asignación de vendedores -->
+        <record id="base_action_rule_external_salesperson_assigned" model="base.automation">
+            <field name="name">Notificar Asignación de Vendedor Externo</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="trigger">on_create</field>
+            <field name="filter_domain">[('external_salesperson_ids', '!=', False)]</field>
+            <field name="state">code</field>
+            <field name="code">
+# Crear mensaje en el chatter cuando se asignan vendedores externos
+if record.external_salesperson_ids:
+    message = """
+    &lt;p&gt;&lt;strong&gt;Vendedores externos asignados:&lt;/strong&gt;&lt;/p&gt;
+    &lt;ul&gt;
+    """
+    for salesperson in record.external_salesperson_ids:
+        message += f"&lt;li&gt;{salesperson.display_name}&lt;/li&gt;"
+    message += "&lt;/ul&gt;"
+    
+    record.message_post(
+        body=message,
+        subject='Vendedores Externos Asignados'
+    )
+            </field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Configuración de secuencia personalizada -->
+        <record id="seq_sale_order_external" model="ir.sequence">
+            <field name="name">Pedidos con Vendedores Externos</field>
+            <field name="code">sale.order.external</field>
+            <field name="prefix">SO-EXT</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">standard</field>
+        </record>
+
+        <!-- Vista dashboard personalizada (datos para futuras extensiones) -->
+        <record id="commission_dashboard_action" model="ir.actions.act_window">
+            <field name="name">Dashboard Comisiones Externas</field>
+            <field name="res_model">gadint.external.salesperson</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{
+                'search_default_active': 1,
+                'dashboard_mode': True
+            }</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Dashboard de Comisiones Externas
+                </p>
+                <p>
+                    Aquí podrá monitorear el rendimiento de todos los vendedores externos,
+                    sus comisiones generadas y el estado de los pagos.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

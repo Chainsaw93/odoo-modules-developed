@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_commission_report_wizard,commission.report.wizard,model_commission_report_wizard,,1,1,1,1
+access_commission_report_wizard_user,commission.report.wizard.user,model_commission_report_wizard,base.group_user,1,1,1,1
+access_commission_report_wizard_manager,commission.report.wizard.manager,model_commission_report_wizard,account.group_account_manager,1,1,1,1
+access_commission_report_wizard_accountant,commission.report.wizard.accountant,model_commission_report_wizard,account.group_account_user,1,1,1,1

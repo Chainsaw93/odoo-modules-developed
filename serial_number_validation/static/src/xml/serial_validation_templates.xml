@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="SerialValidationField" t-inherit="web.CharField" t-inherit-mode="extension">
+        <xpath expr="//input" position="after">
+            <div class="serial-validation-status" t-if="widget.validationStatus !== 'pending'">
+                <div class="serial-success-message" t-if="widget.validationStatus === 'valid'">
+                    <i class="fa fa-check-circle"></i>
+                    Número de serie válido
+                </div>
+                <div class="serial-error-message" t-if="widget.validationStatus === 'invalid'">
+                    <i class="fa fa-exclamation-circle"></i>
+                    Error en validación
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

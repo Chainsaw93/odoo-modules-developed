@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Configuración básica del servicio de validación -->
+        <record id="stock_serial_validation_config" model="ir.config_parameter">
+            <field name="key">stock_serial_validation.enabled</field>
+            <field name="value">True</field>
+        </record>
+
+        <!-- Habilitar seguimiento de lotes globalmente -->
+        <function model="ir.config_parameter" name="set_param">
+            <value>group_stock_production_lot</value>
+            <value>True</value>
+        </function>
+        
+        <function model="ir.config_parameter" name="set_param">
+            <value>group_stock_tracking_lot</value>
+            <value>True</value>
+        </function>
+    </data>
+</odoo>

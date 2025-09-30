@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="menu_reporte_ventas_auditoria" model="ir.ui.menu">
+        <field name="name">Reporte de Ventas Auditoría</field>
+        <!-- Aquí tienes tu parent_id correcto -->
+        <field name="parent_id" ref="account_reports.account_reports_audit_reports_menu"/>
+        <field name="action" ref="sales_auditoria_report.action_wizard_ventas_auditoria"/>
+        <!-- Secuencia alta para aparecer al final -->
+        <field name="sequence">999</field>
+    </record>
+</odoo>
