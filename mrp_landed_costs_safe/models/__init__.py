@@ -1,1 +1,2 @@
-from . import mrp_production
+"""Contenido eliminado por razones legales
+"""

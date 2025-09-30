@@ -1,1 +1,2 @@
-from . import ir_report
+"""Contenido eliminado por razones legales
+"""
